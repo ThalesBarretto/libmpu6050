@@ -1,9 +1,17 @@
 #include "mpu6050_core.h"
-#include <i2c/smbus.h> 		/* for i2c_smbus_x */
-#include <linux/i2c.h> 		/* for i2c_smbus_x */
-#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
-#include <sys/types.h>
+#include "mpu6050_regs.h"
+
 #include <assert.h>
+#include <stdlib.h>		/* for malloc(), free(), exit() */
+#include <stdint.h>		/* for uint8_t, uint16_t, etc */
+#include <string.h>		/* for memcpy(), strlen() */
+#include <tgmath.h>		/* for sin, cos, tan, atan2 etc */
+#include <fcntl.h>		/* for open() */
+#include <unistd.h>		/* for close(), write(), getopt(), size_t */
+#include <sys/types.h>		/* for ssize_t */
+#include <sys/ioctl.h>		/* for ioctl() */
+#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
+
 
 const struct mpu_cfg mpu6050_defcfg = {
 	.cfg =	{
@@ -1344,7 +1352,7 @@ int mpu_ctl_fifo_data(struct mpu_dev *dev)
 		*(dev->Ax2) = (mpu_data_t)*(dev->Ax) * *(dev->Ax); 
 		*(dev->Ay2) = (mpu_data_t)*(dev->Ay) * *(dev->Ay); 
 		*(dev->Az2) = (mpu_data_t)*(dev->Az) * *(dev->Az); 
-		*(dev->AM) = (mpu_data_t)sqrtl(*(dev->Ax2) + *(dev->Ay2) + *(dev->Az2)); 
+		*(dev->AM) = (mpu_data_t)sqrt(*(dev->Ax2) + *(dev->Ay2) + *(dev->Az2)); 
 	}
 	if (dev->cfg->xg_fifo_en && dev->cfg->yg_fifo_en && dev->cfg->zg_fifo_en ) {
 		*(dev->Gx) -= (mpu_data_t)dev->cal->xg_bias; 
@@ -1353,7 +1361,7 @@ int mpu_ctl_fifo_data(struct mpu_dev *dev)
 		*(dev->Gx2) = *(dev->Gx) * *(dev->Gx); 
 		*(dev->Gy2) = *(dev->Gy) * *(dev->Gy); 
 		*(dev->Gz2) = *(dev->Gz) * *(dev->Gz); 
-		*(dev->GM) = (mpu_data_t)sqrtl(*(dev->Gx2) + *(dev->Gy2) + *(dev->Gz2)); 
+		*(dev->GM) = (mpu_data_t)sqrt(*(dev->Gx2) + *(dev->Gy2) + *(dev->Gz2)); 
 	}
 	dev->samples++;
 
@@ -1516,13 +1524,13 @@ int mpu_ctl_selftest(struct mpu_dev * dev, char *fname)
 	uint8_t zg_st =  (stz & ZG_TEST_40_BIT);
 
 	/* ACCEL get factory trim values - datasheet formula for +-8g */
-	long double ft_xa = 4096.0L * 0.34L * powl(0.92L/0.34L, ((long double)(xa_st -1)/14.0L));
-	long double ft_ya = 4096.0L * 0.34L * powl(0.92L/0.34L, ((long double)(ya_st -1)/14.0L));
-	long double ft_za = 4096.0L * 0.34L * powl(0.92L/0.34L, ((long double)(za_st -1)/14.0L));
-	/* GYRO get factory trim values - datahsset fomula for +-250 dps */
-	long double ft_xg =  25.0L * 131.0L * powl(1046L, (long double)(xg_st -1));
-	long double ft_yg = -25.0L * 131.0L * powl(1046L, (long double)(yg_st -1));
-	long double ft_zg =  25.0L * 131.0L * powl(1046L, (long double)(zg_st -1));
+	long double ft_xa = 4096.0L * 0.34L * pow(0.92L/0.34L, ((long double)(xa_st -1)/14.0L));
+	long double ft_ya = 4096.0L * 0.34L * pow(0.92L/0.34L, ((long double)(ya_st -1)/14.0L));
+	long double ft_za = 4096.0L * 0.34L * pow(0.92L/0.34L, ((long double)(za_st -1)/14.0L));
+	/* GYRO get factory trim values - datasheet fomula for +-250 dps */
+	long double ft_xg =  25.0L * 131.0L * pow(1046L, (long double)(xg_st -1));
+	long double ft_yg = -25.0L * 131.0L * pow(1046L, (long double)(yg_st -1));
+	long double ft_zg =  25.0L * 131.0L * pow(1046L, (long double)(zg_st -1));
 
 	long double shift_xa = (xa_str - ft_xa)/ft_xa;
 	long double shift_ya = (ya_str - ft_ya)/ft_ya;
@@ -1534,7 +1542,6 @@ int mpu_ctl_selftest(struct mpu_dev * dev, char *fname)
 	FILE *fp;
 	if ((fp = fopen(fname, "w+")) == NULL) {
 		fprintf(stderr, "Couldn't open \"%s\" for self-test results! - logging to stderr.\n", fname);
-		fp = stderr;
 	} else {
 		fprintf(fp, "Self-test results: Xa = %Lf%% shift from factory trim (%4s)\n", fabsl(shift_xa), fabsl(shift_xa) < 14.0L ? "PASS" : "FAIL");
 		fprintf(fp, "Self-test resutls: Ya = %Lf%% shift from factory trim (%4s)\n", fabsl(shift_ya), fabsl(shift_ya) < 14.0L ? "PASS" : "FAIL");

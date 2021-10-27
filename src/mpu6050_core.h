@@ -6,23 +6,9 @@
 
 #include <stdlib.h>		/* for malloc(), free(), exit() */
 #include <stdio.h>		/* for printf(), scanf(), fopen(), perror() */
-#include <string.h>		/* for memcpy() */
-#include <unistd.h>		/* for close(), write(), getopt(), size_t */
-#include <inttypes.h>		/* for uint8_t, uint16_t, etc */
 #include <stdint.h>		/* for uint8_t, uint16_t, etc */
-#include <stddef.h>		/* for size_t */
 #include <stdbool.h>		/* for bool */
-#include <fcntl.h>		/* for open() */
-#include <sys/stat.h>		/* for open() */
-#include <sys/types.h>		/* for open() */
-#include <sys/socket.h>		/* for open() */
-#include <netdb.h>		/* for ioctl() */
-#include <sys/ioctl.h>		/* for ioctl() */
-#include <linux/types.h>	/* for __u8, __s32 */
-#include <stdio.h>		/* for printf, etc */
-#include <math.h>		/* for sin, cos, tan, atan2 etc */
-#include <time.h>		/* for clock_nanosleep */
-#include "mpu6050_core_regs.h"
+#include <time.h>		/* for timespec_t */
 
 /*
  * Orientation of Sensor Axis

@@ -1,4 +1,5 @@
 #include "mpu6050_core.h"
+#include "mpu6050_regs.h"
 
 uint8_t mpu_regvalues[128];
 
