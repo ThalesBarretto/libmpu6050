@@ -3,6 +3,7 @@
 #include <linux/i2c.h> 		/* for i2c_smbus_x */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
 #include <sys/types.h>
+#include <assert.h>
 
 const struct mpu_cfg mpu6050_defcfg = {
 	.cfg =	{
@@ -23,6 +24,19 @@ const struct mpu_cfg mpu6050_defcfg = {
 extern int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 /* helpers - internal use only */
+
+#define MPUDEV_IS_NULL(dev)	((NULL == (dev)) ||      \
+				 (NULL == (dev)->dat) || \
+				 (NULL == (dev)->cfg) || \
+				 (NULL == (dev)->bus) || \
+				 (NULL == (dev)->cal))
+
+#define MPUDEV_NOT_NULL(dev)	((NULL != (dev)) &&      \
+				 (NULL != (dev)->dat) && \
+				 (NULL != (dev)->cfg) && \
+				 (NULL != (dev)->bus) && \
+				 (NULL != (dev)->cal))
+
 static int mpu_dev_bind(const char * path, 
 			const mpu_reg_t address,
 			struct mpu_dev * dev);

@@ -1,10 +1,9 @@
 #include "mpu6050_core.h"
+#include <assert.h>
 
 int mpu_diagnose(struct mpu_dev * dev)
 {
-	if(MPUDEV_IS_NULL(dev))
-		return -1;
-
+	assert(NULL != dev);
 	printf("%-20s %6d\n"	  ,"File Descriptor"	, *(dev->bus));
 	printf("%-20s %#6x\n"	  ,"ADDRESS"		, dev->addr);
 	printf("%-20s %#6x\n"	  ,"PRODUCT ID"		, dev->prod_id);
@@ -77,6 +76,5 @@ int mpu_diagnose(struct mpu_dev * dev)
 	printf("scl[6](%lf) %lf\n", dev->dat->scl[6], 1/dev->glbs);
 	printf("scl[7](%lf) %lf\n", dev->dat->scl[7], 1/dev->glbs);
 	printf("----------------------------------------\n");
-
 	return 0;
 }

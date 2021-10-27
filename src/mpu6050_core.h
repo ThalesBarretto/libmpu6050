@@ -223,7 +223,6 @@ struct mpu_cfg {
  */
 #define MPU_MODE_RESET 0
 #define MPU_MODE_RESTORE 1
-#define MPU_MAXLINE 1024 
 #define MPU_DEFBKP "default_saved.bin"
 #define MPU_DEFDUM "default_dump.txt"
 
@@ -309,22 +308,6 @@ int mpu_write_word(struct mpu_dev * const dev,
 		const mpu_reg_t reg, 		/* device register */
 		const mpu_word_t val);		/* value to write */
 
-#define MPU_SOCK_BUFFSIZ 500
-int mpu_socket_connect(int *sfd, char *host, char *port);
-int mpu_socket_sendmsg(int *sfd, char *msg);
-int mpu_socket_makemsg(struct mpu_dev *dev, char *msg, char *buf);
-
-#define MPUDEV_IS_NULL(dev)	((NULL == (dev)) ||      \
-				 (NULL == (dev)->dat) || \
-				 (NULL == (dev)->cfg) || \
-				 (NULL == (dev)->bus) || \
-				 (NULL == (dev)->cal))
-
-#define MPUDEV_NOT_NULL(dev)	((NULL != (dev)) &&      \
-				 (NULL != (dev)->dat) && \
-				 (NULL != (dev)->cfg) && \
-				 (NULL != (dev)->bus) && \
-				 (NULL != (dev)->cal))
 
 #endif /* _MPU6050_CORE_H_ */
 
