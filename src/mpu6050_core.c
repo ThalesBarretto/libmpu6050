@@ -1,7 +1,6 @@
 #include "mpu6050_core.h"
 #include "mpu6050_regs.h"
 
-#include <assert.h>
 #include <stdlib.h>		/* for malloc(), free(), exit() */
 #include <stdint.h>		/* for uint8_t, uint16_t, etc */
 #include <string.h>		/* for memcpy(), strlen() */
