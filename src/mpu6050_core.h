@@ -23,7 +23,7 @@
  */
 #define MSG_AXIS "" \
 "---------------------------------------------------\n" \
-"      MPU-6050 FACTORY SENSOR AXIS SETUP           \n" \
+"              MPU-6050 SENSOR AXIS SETUP           \n" \
 "---------------------------------------------------\n" \
 "                      (-Az,+Gz CCW)                \n" \
 "                          ^                        \n" \
@@ -194,9 +194,11 @@ struct mpu_cfg {
  * 	Sampling rate control 	- 10,20,25,50,100,200 Hz
  * 	Buffered readings	- ensures regular sampling interval
  * 	DLPF (Digital Low Pass filter) - refer to datasheet
+ * 	Self-tests
+ * 	Register dump
+ * 	Calibration
  *
  * Unsupported features
- * 	Self-tests		- lazy
  * 	eDMP (embedded Digital Motion Proccessor) - blob, undocumented
  * 	Low-power modes		- not our use case
  * 	External interrupts	- not our use case
@@ -221,21 +223,10 @@ int mpu_init(	const char * const path,
 
 int mpu_destroy(struct mpu_dev * mpudev);
 
-int mpu_ctl_reset(struct mpu_dev * dev);
-int mpu_ctl_dump(struct mpu_dev * dev, char* fn);
-
-int mpu_ctl_calibration(struct mpu_dev * dev);
-int mpu_ctl_calibration_reset(struct mpu_dev * dev);
-int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp);
-
-int mpu_ctl_bias_set  (struct mpu_dev *dev);
-int mpu_ctl_bias_print(struct mpu_dev *dev);
-
-int mpu_ctl_selftest		  (struct mpu_dev *dev, char *fname);
-int mpu_ctl_selftest_enable_accel (struct mpu_dev *dev);
-int mpu_ctl_selftest_enable_gyro  (struct mpu_dev *dev);
-int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
-int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
+int mpu_ctl_calibrate		(struct mpu_dev *dev);
+int mpu_ctl_reset		(struct mpu_dev *dev);
+int mpu_ctl_dump		(struct mpu_dev *dev, char *filename);
+int mpu_ctl_selftest		(struct mpu_dev *dev, char *filename);
 
 int mpu_ctl_fifo_enable		(struct mpu_dev *dev);
 int mpu_ctl_fifo_enable_accel	(struct mpu_dev *dev);
@@ -245,58 +236,41 @@ int mpu_ctl_fifo_disable	(struct mpu_dev *dev);
 int mpu_ctl_fifo_disable_accel	(struct mpu_dev *dev);
 int mpu_ctl_fifo_disable_gyro	(struct mpu_dev *dev);
 int mpu_ctl_fifo_disable_temp	(struct mpu_dev *dev);
-int mpu_ctl_fifo_count		(struct mpu_dev *dev);
 int mpu_ctl_fifo_data		(struct mpu_dev *dev);
+int mpu_ctl_fifo_count		(struct mpu_dev *dev);
 int mpu_ctl_fifo_flush		(struct mpu_dev *dev);
-int mpu_ctl_fifo_reset		(struct mpu_dev *dev);
 
-
-int mpu_ctl_i2c_mst_reset	(struct mpu_dev *dev);
 int mpu_ctl_sig_cond_reset	(struct mpu_dev *dev);
 
+int mpu_ctl_wake		(struct mpu_dev *dev);
 
-int mpu_ctl_wake(struct mpu_dev *  dev);
+int mpu_ctl_samplerate(		struct mpu_dev *dev, unsigned int hertz);
+int mpu_ctl_dlpf(		struct mpu_dev *dev, unsigned int dlpf);
+int mpu_ctl_accel_range(	struct mpu_dev *dev, unsigned int range);
+int mpu_ctl_gyro_range(		struct mpu_dev *dev, unsigned int range);
+int mpu_ctl_clocksource(	struct mpu_dev *dev, mpu_reg_t clksel);
 
-int mpu_ctl_samplerate( struct mpu_dev * dev,
-			unsigned int rate_hz);
+int mpu_read_byte(		struct mpu_dev * const dev,
+				const mpu_reg_t reg,	/* device register */
+				mpu_reg_t * val);	/* value destination */
 
-int mpu_ctl_dlpf(struct mpu_dev * dev,
-	       	 unsigned int dlpf);
+int mpu_read_word(		struct mpu_dev * const dev,
+				const mpu_reg_t reg,	/* device register */
+				mpu_word_t * val);	/* value destination */
 
-int mpu_ctl_accel_range( struct mpu_dev * dev,
-			unsigned int range);
+int mpu_read_data(		struct mpu_dev * const dev,
+				const mpu_reg_t reg,	/* device register */
+				int16_t * val);		/* value destination */
 
-int mpu_ctl_gyro_range( struct mpu_dev * dev,
-			unsigned int range);
+int mpu_write_byte(		struct mpu_dev * const dev,
+				const mpu_reg_t reg,	/* device register */
+				const mpu_reg_t val);	/* value to write */
 
-int mpu_ctl_temperature(struct mpu_dev * dev,
-			bool temp_on);
+int mpu_write_word		(struct mpu_dev * const dev,
+				const mpu_reg_t reg,	/* device register */
+				const mpu_word_t val);	/* value to write */
 
-int mpu_ctl_clocksource(struct mpu_dev * dev,
-			mpu_reg_t clksel);
-
-int mpu_read_byte(struct mpu_dev * const dev,
-		const mpu_reg_t reg, 		/* device register */
-		mpu_reg_t * val);		/* value destination */
-
-int mpu_read_word(struct mpu_dev * const dev,
-		const mpu_reg_t reg, 		/* device register */
-		mpu_word_t * val);		/* value destination */
-
-int mpu_read_data(struct mpu_dev * const dev,
-		const mpu_reg_t reg, 		/* device register */
-		int16_t * val);			/* value destination */
-
-int mpu_write_byte(struct mpu_dev * const dev,
-		const mpu_reg_t reg, 		/* device register */
-		const mpu_reg_t val);		/* value to write */
-
-int mpu_write_word(struct mpu_dev * const dev,
-		const mpu_reg_t reg, 		/* device register */
-		const mpu_word_t val);		/* value to write */
-
-
-#endif /* _MPU6050_CORE_H_ */
+#endif /* _MPU6050_H_ */
 
 #ifdef __cplusplus
 	}

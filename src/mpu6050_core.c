@@ -11,7 +11,6 @@
 #include <sys/ioctl.h>		/* for ioctl() */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
 
-
 const struct mpu_cfg mpu6050_defcfg = {
 	.cfg =	{
 		{ PWR_MGMT_1,   0x03},	/* power on, temp enabled, clock gyro_z */
@@ -59,6 +58,9 @@ static int mpu_cfg_recover(struct mpu_dev * dev) __attribute__((unused));
 static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev);
 static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev);
 
+static int mpu_ctl_calibration_reset(struct mpu_dev *dev);
+static int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp);
+
 static int mpu_cfg_set_CLKSEL(struct mpu_dev * dev,
 			      mpu_reg_t clksel);
 
@@ -83,7 +85,16 @@ static int mpu_cfg_parse_FIFO_EN(	struct mpu_dev * dev);
 static int mpu_cfg_parse_INT_ENABLE(	struct mpu_dev * dev);
 static int mpu_cfg_parse_INT_PIN_CFG(	struct mpu_dev * dev);
 
+static int mpu_ctl_selftest_enable_accel (struct mpu_dev *dev);
+static int mpu_ctl_selftest_enable_gyro  (struct mpu_dev *dev);
+static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
+static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
+
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
+static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
+static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
+static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
+
 
 /*
  * USAGE:
@@ -453,7 +464,7 @@ int mpu_ctl_gyro_range(struct mpu_dev * dev, unsigned int range)
 	return 0;
 }
 
-int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on)
+static int __attribute__((unused)) mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on)
 {
 	if ((NULL == dev) || (NULL == dev->bus)) 
 		return -1;
@@ -1561,7 +1572,7 @@ int mpu_ctl_selftest(struct mpu_dev * dev, char *fname)
 }
 
 
-int mpu_ctl_fifo_reset(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_fifo_reset(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1577,7 +1588,7 @@ int mpu_ctl_fifo_reset(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1746,7 +1757,7 @@ int mpu_ctl_fifo_disable_temp(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_selftest_fifo_disable(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_selftest_fifo_disable(struct mpu_dev *dev)
 {
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1774,7 +1785,7 @@ int mpu_ctl_selftest_fifo_disable(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_selftest_enable_accel(struct mpu_dev *dev)
+static int mpu_ctl_selftest_enable_accel(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
@@ -1795,7 +1806,7 @@ int mpu_ctl_selftest_enable_accel(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_selftest_enable_gyro(struct mpu_dev *dev)
+static int mpu_ctl_selftest_enable_gyro(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
@@ -1816,7 +1827,7 @@ int mpu_ctl_selftest_enable_gyro(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev)
+static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
@@ -1879,7 +1890,7 @@ int mpu_ctl_reset(struct mpu_dev *dev)
 }
 
 
-int mpu_ctl_calibration_reset(struct mpu_dev *dev)
+static int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 {
 	mpu_ctl_reset(dev); /* clear the OFFS_USRH registers */
 
@@ -1906,7 +1917,7 @@ int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
+static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
 {
 	mpu_ctl_calibration_reset(dev); /* clear OFFS_USRH registers and calibration data */
 	dev->cal->xa_cust = bkp->xa_cust;
@@ -1945,7 +1956,7 @@ int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
 	return 0;
 }
 
-int mpu_ctl_calibration(struct mpu_dev *dev)
+int mpu_ctl_calibrate(struct mpu_dev *dev)
 {
 	/* prepare the device for calibration */
 	struct mpu_cfg *cfg_old = calloc(1, sizeof(struct mpu_cfg));
@@ -2031,14 +2042,9 @@ int mpu_ctl_calibration(struct mpu_dev *dev)
 		zg_bias += *(dev->Gz);
 		GM_bias += *(dev->GM);
 	}
-	//xa_bias /= dev->cal->samples;
-	//ya_bias /= dev->cal->samples;
-	//za_bias /= dev->cal->samples;
-	//AM_bias /= dev->cal->samples;
 	xg_bias /= dev->cal->samples;
 	yg_bias /= dev->cal->samples;
 	zg_bias /= dev->cal->samples;
-	//GM_bias /= dev->cal->samples;
 	mpu_read_data(dev, XG_OFFS_USRH, &dev->cal->xg_orig);
 	mpu_read_data(dev, YG_OFFS_USRH, &dev->cal->yg_orig);
 	mpu_read_data(dev, ZG_OFFS_USRH, &dev->cal->zg_orig);
@@ -2052,7 +2058,6 @@ int mpu_ctl_calibration(struct mpu_dev *dev)
 	mpu_write_byte(dev, ZG_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->zg_cust)>>8)&0xFF));
 	mpu_write_byte(dev, ZG_OFFS_USRL,(uint8_t)((uint16_t)dev->cal->zg_cust)&0xFF);
 
-	//TODO: replace this for a rotation matrix
 	xa_bias = 0;
 	ya_bias = 0;
 	za_bias = 0;
