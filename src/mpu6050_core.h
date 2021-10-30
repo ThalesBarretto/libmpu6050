@@ -250,7 +250,6 @@ int mpu_ctl_fifo_data		(struct mpu_dev *dev);
 int mpu_ctl_fifo_flush		(struct mpu_dev *dev);
 int mpu_ctl_fifo_reset		(struct mpu_dev *dev);
 
-void mpu_ctl_fix_axis(struct mpu_dev *dev);
 
 int mpu_ctl_i2c_mst_reset	(struct mpu_dev *dev);
 int mpu_ctl_sig_cond_reset	(struct mpu_dev *dev);
