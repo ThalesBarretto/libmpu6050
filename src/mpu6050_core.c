@@ -11,6 +11,10 @@
 #include <sys/ioctl.h>		/* for ioctl() */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
 
+#ifndef MPU6050_ADDR
+#define MPU6050_ADDR 0x68
+#endif
+
 const struct mpu_cfg mpu6050_defcfg = {
 	.cfg =	{
 		{ PWR_MGMT_1,   0x03},	/* power on, temp enabled, clock gyro_z */
@@ -92,6 +96,7 @@ static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
 
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
 static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
+static int mpu_ctl_fifo_data(struct mpu_dev *dev);
 static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
 static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
 static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
@@ -103,22 +108,17 @@ static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
  *
  * Call mpu_init()
  * 	Use path "/dev/i2c-1/" (default)
- * 	Use address 0x68 (default)
  * 	Use mpudev (mpudev must be NULL)
  *
  *	 Success( 0) mpudev ready.
  *	 Failure(-1) nothing changed.
  */
 int mpu_init(	const char * const restrict path,
-		const mpu_reg_t address,
 		struct mpu_dev ** mpudev,
 		const int mode)
 {
 	
 	if (*mpudev != NULL) /* device not empty */
-		return -1;
-	
-	if ((address == (mpu_reg_t)0x00)) /* invalid address */
 		return -1;
 	
 	size_t pathlen = strlen(path);
@@ -131,7 +131,7 @@ int mpu_init(	const char * const restrict path,
 		return -1;
 
 	
-	if ((mpu_dev_bind(path, address, dev)) < 0) /* could't bind */
+	if ((mpu_dev_bind(path, MPU6050_ADDR, dev)) < 0) /* could't bind */
 		goto mpu_init_error;
 	
 	if ((mpu_ctl_wake(dev)) < 0) /* wake up failed */
@@ -1332,7 +1332,7 @@ int mpu_get_data(struct mpu_dev *dev)
 }
 
 
-int mpu_ctl_fifo_data(struct mpu_dev *dev)
+static int mpu_ctl_fifo_data(struct mpu_dev *dev)
 {
 	if (MPUDEV_IS_NULL(dev))
 		return -1;
