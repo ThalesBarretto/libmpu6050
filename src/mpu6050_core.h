@@ -207,10 +207,12 @@ struct mpu_cfg {
  * 	On success, return 0.
  * 	On failure, return -1;
  */
-#define MPU_MODE_RESET 0
-#define MPU_MODE_RESTORE 1
-#define MPU_DEFBKP "default_saved.bin"
-#define MPU_DEFDUM "default_dump.txt"
+#define MPU6050_RESET 0
+#define MPU6050_RESTORE 1
+
+#ifndef MPU6050_CFGFILE
+#define MPU6050_CFGFILE "mpu6050_cfg.bin"
+#endif
 
 int mpu_init(	const char * const path,
 		const uint8_t address,

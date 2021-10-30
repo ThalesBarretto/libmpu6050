@@ -134,7 +134,7 @@ int mpu_init(	const char * const restrict path,
 
 
 	switch (mode) {	
-		case MPU_MODE_RESET:
+		case MPU6050_RESET:
 			if ((mpu_cfg_reset(dev)) < 0) /* assign default config */
 				goto mpu_init_error;
 			if ((mpu_cal_reset(dev)) < 0) /* assign unity gain, zero errors */
@@ -144,8 +144,8 @@ int mpu_init(	const char * const restrict path,
 				goto mpu_init_error;
 			break;
 
-		case MPU_MODE_RESTORE:
-			mpu_dev_parameters_restore(MPU_DEFBKP, dev); /* read config from device */
+		case MPU6050_RESTORE:
+			mpu_dev_parameters_restore(MPU6050_CFGFILE, dev); /* read config from device */
 			/* fill device structure */
 			if ((mpu_cfg_parse(dev)) < 0)
 				return -1;
@@ -555,7 +555,7 @@ static int mpu_cfg_set(struct mpu_dev * dev)
 		return -1;
 
 
-	mpu_dev_parameters_save(MPU_DEFBKP, dev);
+	mpu_dev_parameters_save(MPU6050_CFGFILE, dev);
 
 	return 0;
 }
@@ -2103,7 +2103,7 @@ int mpu_ctl_calibration(struct mpu_dev *dev)
 
 	mpu_cfg_set(dev);
 	mpu_dat_set(dev);
-	mpu_dev_parameters_save(MPU_DEFBKP, dev);
+	mpu_dev_parameters_save(MPU6050_CFGFILE, dev);
 	mpu_ctl_fifo_flush(dev);
 
 	return 0;

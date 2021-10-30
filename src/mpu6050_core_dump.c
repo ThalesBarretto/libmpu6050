@@ -118,10 +118,14 @@ char mpu_regnames[ 128 ][ 32 ] = {
 
 int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 {
-
+	if(NULL == fn) {
+		fprintf(stderr, "%s failed: NULL filename\n", __func__);
+		return -1;
+	}
+		
 	FILE *fp;
 	if ( (fp = fopen(fn, "w+")) == NULL) {
-		fprintf(stderr, "Unable to open file \"%s\"\n", fn);
+		fprintf(stderr, "%s failed: Unable to open file \"%s\"\n", __func__, fn);
 		return -1;
 	}
 
