@@ -10,33 +10,23 @@
 #include <stdbool.h>		/* for bool */
 #include <time.h>		/* for timespec_t */
 
-/*
- * Orientation of Sensor Axis
- *
- * Axis should be individually checked for: sequence, polarity, matching.
- *  I has been fount that:s
- * 	Accelerometer readings are inverse-polarity with respect to sensor body
- *	Gyroscope is correct with respect to the sensor body
- *
- * The correct orientation and polarity is as shown:
- *  (compare with: Product specification rev. 3.4., p. 40, 46.)
- */
+/* See Product specification rev. 3.4., p. 40, 46. */
 #define MSG_AXIS "" \
 "---------------------------------------------------\n" \
 "              MPU-6050 SENSOR AXIS SETUP           \n" \
 "---------------------------------------------------\n" \
-"                      (-Az,+Gz CCW)                \n" \
+"                          Z                        \n" \
 "                          ^                        \n" \
-"                          | (-Ay,+Gy CCW)          \n" \
-"       sensor body        |   ^		    \n" \
+"                          |    Y                   \n" \
+"        sensor body       |   ^                    \n" \
 "        (top view)        |  /                     \n" \
 "       ____________       | /                      \n" \
-"      /0          /'      |/                       \n" \
-"     / MPU-60050 /.       0---------->(-Ax,+Gx CCW)\n" \
-"    /           /.        Standard Axis            \n" \
-"   /           /. 	   Configuration            \n" \
-"  /___________/.   				    \n" \
-"  '...........'    				    \n" \
+"      /*          /'      |/                       \n" \
+"     / MPU-60050 /.       0---------> X            \n" \
+"    /           /.                                 \n" \
+"   /           /.                                  \n" \
+"  /___________/.                                   \n" \
+"  '...........'                                    \n" \
 "                                                   \n" \
 "___________________________________________________\n"
 
@@ -185,18 +175,18 @@ struct mpu_cfg {
  * 	dtparam=i2c_arm_baudrate=400000
  *
  * Supported features
+ * 	Buffered readings	- all reading come from fifo buffer
  * 	Accelerometer		- enable/disable, range setting
  * 	Gyroscope 	  	- enable/disable, range setting
  * 	Temperature sensor	- enable/disable
  * 	Sampling rate control 	- 10,20,25,50,100,200 Hz
- * 	Buffered readings	- ensures regular sampling interval
- * 	DLPF (Digital Low Pass filter) - refer to datasheet
- * 	Self-tests
+ * 	Digital Low Pass filter	- refer to datasheet
+ * 	Self-tests		- refer to datasheet
  * 	Register dump
  * 	Calibration
  *
  * Unsupported features
- * 	eDMP (embedded Digital Motion Proccessor) - blob, undocumented
+ * 	eDMP (embedded Digital Motion Proccessor) - proprietary blob
  * 	Low-power modes		- not our use case
  * 	External interrupts	- not our use case
  * 	External clock sources	- not our use case

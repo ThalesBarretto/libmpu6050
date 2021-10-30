@@ -102,17 +102,6 @@ static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
 static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
 
 
-/*
- * USAGE:
- * Create an empty
- *
- * Call mpu_init()
- * 	Use path "/dev/i2c-1/" (default)
- * 	Use mpudev (mpudev must be NULL)
- *
- *	 Success( 0) mpudev ready.
- *	 Failure(-1) nothing changed.
- */
 int mpu_init(	const char * const restrict path,
 		struct mpu_dev ** mpudev,
 		const int mode)
