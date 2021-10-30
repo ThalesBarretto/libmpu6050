@@ -91,6 +91,7 @@ static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
 
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
+static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
 static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
 static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
 static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
@@ -1322,6 +1323,15 @@ dev_bind_exit:
 }
 
 
+int mpu_get_data(struct mpu_dev *dev)
+{
+	mpu_ctl_fifo_data(dev);
+	mpu_ctl_fix_axis(dev);
+
+	return 0;
+}
+
+
 int mpu_ctl_fifo_data(struct mpu_dev *dev)
 {
 	if (MPUDEV_IS_NULL(dev))
@@ -2113,7 +2123,7 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 }
 
 
-void mpu_ctl_fix_axis(struct mpu_dev *dev)
+static inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
 {
 	if (dev->cfg->accel_fifo_en) {
 		*(dev->Ax) *= -1;

@@ -222,6 +222,7 @@ int mpu_init(	const char * const path,
 		const int mode);
 
 int mpu_destroy(struct mpu_dev * mpudev);
+int mpu_get_data(struct mpu_dev * mpudev);
 
 int mpu_ctl_calibrate		(struct mpu_dev *dev);
 int mpu_ctl_reset		(struct mpu_dev *dev);
