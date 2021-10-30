@@ -928,9 +928,7 @@ static int mpu_cfg_parse_SMPLRT_DIV(struct mpu_dev * dev)
 
 	dev->sr   = sampling_rate; 
 	dev->st	  = sampling_time;
-	//dev->dly.tv_sec = trunc(sampling_time);
 	dev->dly.tv_sec = lrint(sampling_time);
-	//dev->dly.tv_nsec = 1000000000 * (sampling_time - dev->dly.tv_sec);
 	dev->dly.tv_nsec = 1000000000 * lrint(sampling_time - dev->dly.tv_sec);
 
 	
