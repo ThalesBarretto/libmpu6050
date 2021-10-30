@@ -4,12 +4,89 @@
 #include <stdlib.h>		/* for malloc(), free(), exit() */
 #include <stdint.h>		/* for uint8_t, uint16_t, etc */
 #include <string.h>		/* for memcpy(), strlen() */
+#include <stdio.h>
 #include <tgmath.h>		/* for sin, cos, tan, atan2 etc */
 #include <fcntl.h>		/* for open() */
 #include <unistd.h>		/* for close(), write(), getopt(), size_t */
 #include <sys/types.h>		/* for ssize_t */
 #include <sys/ioctl.h>		/* for ioctl() */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
+
+struct mpu_cal {
+	mpu_data_t gra;		/* mean(sqrt(ax2,ay2,az2)[])		*/
+	mpu_data_t off[32];	/* ax - mean(ax[n]), ...		*/
+	mpu_data_t gai[32];	/* ax[expec_1g]/ax[measured_1g], ...	*/
+	mpu_data_t dri[32];	/* delta(mean(ax[n])/delta(time), ...	*/
+	int16_t xa_orig;
+	int16_t ya_orig;
+	int16_t za_orig;
+	int16_t xg_orig;
+	int16_t yg_orig;
+	int16_t zg_orig;
+	int16_t xa_cust;
+	int16_t ya_cust;
+	int16_t za_cust;
+	int16_t xg_cust;
+	int16_t yg_cust;
+	int16_t zg_cust;
+	int samples;
+	long double xa_bias;
+	long double ya_bias;
+	long double za_bias;
+	long double xg_bias;
+	long double yg_bias;
+	long double zg_bias;
+	long double AM_bias;
+	long double GM_bias;
+};
+
+struct mpu_dat {
+	int16_t raw[32];	/* raw sensor data	*/
+	mpu_data_t scl[32];	/* scaling factors	*/
+	mpu_data_t dat[32][2];	/* scaled data		*/
+	mpu_data_t squ[32];	/* squared data		*/
+	mpu_data_t mea[32];	/* data mean		*/
+	mpu_data_t var[32];	/* data variance	*/
+	mpu_data_t AM;		/* accel magnitude	*/
+	mpu_data_t GM;		/* gyro rate magnitude	*/
+};
+
+struct mpu_cfg {
+	mpu_reg_t cfg[16][2];	/* configuration state	*/
+	/* configuration bits   -> REGISTER	 */
+	bool sleep; 		/* PWR_MGMGT_1 */
+	bool cycle; 		/* PWR_MGMGT_1 */
+	bool temp_dis;		/* PWR_MGMGT_1 */
+	bool xg_st;		/* GYRO_CONFIG */
+	bool yg_st;		/* GYRO_CONFIG */
+	bool zg_st;		/* GYRO_CONFIG */
+	bool xa_st;		/* ACCEL_CONFIG */
+	bool ya_st;		/* ACCEL_CONFIG */
+	bool za_st;		/* ACCEL_CONFIG */
+	bool stdby_xa; 		/* PWR_MGMGT_2 */
+	bool stdby_ya; 		/* PWR_MGMGT_2 */
+	bool stdby_za; 		/* PWR_MGMGT_2 */
+	bool stdby_xg; 		/* PWR_MGMGT_2 */
+	bool stdby_yg; 		/* PWR_MGMGT_2 */
+	bool stdby_zg; 		/* PWR_MGMGT_2 */
+	bool fifo_en;		/* USER_CTRL */
+	bool i2c_mst_en; 	/* USER_CTRL */
+	bool i2c_if_dis;	/* USER_CTRL */
+	bool temp_fifo_en;  	/* FIFO_EN */
+	bool accel_fifo_en; 	/* FIFO_EN */
+	bool xg_fifo_en;  	/* FIFO_EN */
+	bool yg_fifo_en;  	/* FIFO_EN */
+	bool zg_fifo_en;  	/* FIFO_EN */
+	bool slv0_fifo_en;  	/* FIFO_EN */
+	bool slv1_fifo_en;  	/* FIFO_EN */
+	bool slv2_fifo_en;  	/* FIFO_EN */
+	bool slv3_fifo_en;  	/* I2C_MST_CTRL */
+	bool slv4_fifo_en;  	/* I2C_MST_CTRL */
+	bool fsync_int_en;  	/* INT_PIN_CFG	__not_supported__ */
+	bool fifo_oflow_en;  	/* INT_ENABLE */
+	bool i2c_mst_int_en;  	/* INT_ENABLE */
+	bool data_rdy_en;  	/* INT_ENABLE */
+};
 
 #ifndef MPU6050_ADDR
 #define MPU6050_ADDR 0x68
@@ -93,14 +170,25 @@ static int mpu_ctl_selftest_enable_accel (struct mpu_dev *dev);
 static int mpu_ctl_selftest_enable_gyro  (struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
-
+static int mpu_ctl_wake(struct mpu_dev *dev);
+static int mpu_ctl_fifo_count(struct mpu_dev *dev);
+static int mpu_ctl_fifo_flush(struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_accel (struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_gyro  (struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_gyro (struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_temp (struct mpu_dev *dev);
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
 static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
 static int mpu_ctl_fifo_data(struct mpu_dev *dev);
 static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
 static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
 static int mpu_ctl_temperature(struct mpu_dev * dev, bool temp_on);
-
+static int mpu_read_byte(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_reg_t * val);
+static int mpu_read_word(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_word_t * val);
+static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_t * val);
+static int mpu_write_byte(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_reg_t val);
+static int mpu_write_word(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_word_t val);
 
 int mpu_init(	const char * const restrict path,
 		struct mpu_dev ** mpudev,
@@ -2147,3 +2235,299 @@ static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev)
 	return 0;
 }
 
+int mpu_diagnose(struct mpu_dev * dev)
+{
+	if ((NULL == dev) || (NULL == dev->bus))
+		return -1;
+
+	printf("%-20s %6d\n"	  ,"File Descriptor"	, *(dev->bus));
+	printf("%-20s %#6x\n"	  ,"ADDRESS"		, dev->addr);
+	printf("%-20s %#6x\n"	  ,"PRODUCT ID"		, dev->prod_id);
+	printf("%-20s %6.0lf %s\n","Wake frequency"	, dev->wake_freq	,"(Hz)");
+	printf("%-20s %6.0lf %s\n","CLOCK frequency"	, dev->clock_freq	,"(Hz)");
+	printf("%-20s %6d %s\n"	  ,"Gyro Output Rate"	, dev->gor		,"(Hz)");
+	printf("%-20s %6.0lf %s\n","Sampling rate"	, dev->sr		,"(Hz)");
+	printf("%-20s %6.0lf %s\n","Sampling time"	, dev->st		,"(s)");
+	printf("%-20s %6.0lf %s\n","Accel Full Range"	, dev->afr		,"(g)");
+	printf("%-20s %6.0lf %s\n","Accel LBS"		, dev->albs		,"(LSB/g)");
+	printf("%-20s %6.0lf %s\n","Accel bandwidth"	, dev->abdw		,"(Hz)");
+	printf("%-20s %6.0lf %s\n","Accel delay"	, dev->adly		,"(ms)");
+	printf("%-20s %6.0lf %s\n","Gyro Full Range"	, dev->gfr		,"(degrees/s)");
+	printf("%-20s %6.0lf %s\n","Gyro LBS"		, dev->glbs		,"(LSB/degress/s)");
+	printf("%-20s %6.0lf %s\n","Gyro bandwidth"	, dev->gbdw		,"(Hz)");
+	printf("%-20s %6.0lf %s\n","Gyro delay"		, dev->gdly		,"(ms)");
+	printf("----------------------------------------\n");
+	printf("%-20s %d\n","SLEEP BIT"		, dev->cfg->sleep );
+	printf("%-20s %d\n","CYCLE BIT"		, dev->cfg->cycle );
+	printf("%-20s %d\n","TEMP_DIS BIT"	, dev->cfg->temp_dis );
+	printf("%-20s %d\n","STDBY_XA BIT"	, dev->cfg->stdby_xa );
+	printf("%-20s %d\n","STDBY_YA BIT"	, dev->cfg->stdby_ya );
+	printf("%-20s %d\n","STDBY_ZA BIT"	, dev->cfg->stdby_za );
+	printf("%-20s %d\n","STDBY_XG BIT"	, dev->cfg->stdby_xg );
+	printf("%-20s %d\n","STDBY_YG BIT"	, dev->cfg->stdby_yg );
+	printf("%-20s %d\n","STDBY_ZG BIT"	, dev->cfg->stdby_zg );
+	printf("%-20s %d\n","I2C_MST_EN BIT"	, dev->cfg->i2c_mst_en );
+	printf("%-20s %d\n","I2C_IF_DIS BIT"	, dev->cfg->i2c_if_dis );
+	printf("%-20s %d\n","FIFO_EN BIT"	, dev->cfg->fifo_en );
+	printf("%-20s %d\n","TEMP_FIFO_EN BIT"	, dev->cfg->temp_fifo_en );
+	printf("%-20s %d\n","FIFO Accel BIT"	, dev->cfg->accel_fifo_en );
+	printf("%-20s %d\n","FIFO Gyro X BIT"	, dev->cfg->xg_fifo_en );
+	printf("%-20s %d\n","FIFO Gyro Y BIT"	, dev->cfg->yg_fifo_en );
+	printf("%-20s %d\n","FIFO Gyro Z BIT"	, dev->cfg->zg_fifo_en );
+	printf("%-20s %d\n","FIFO SLV0"		, dev->cfg->slv0_fifo_en );
+	printf("%-20s %d\n","FIFO SLV1"		, dev->cfg->slv1_fifo_en );
+	printf("%-20s %d\n","FIFO SLV2"		, dev->cfg->slv2_fifo_en );
+	printf("%-20s %d\n","FIFO SLV3"		, dev->cfg->slv3_fifo_en );
+	printf("%-20s %d\n","FIFO SLV4"		, dev->cfg->slv4_fifo_en );
+	printf("%-20s %d\n","FSYNC_INT_EN BIT"	, dev->cfg->fsync_int_en );
+	printf("%-20s %d\n","FIFO_OFLOW_EN BIT"	, dev->cfg->fifo_oflow_en );
+	printf("%-20s %d\n","I2C_MST_INT_EN BIT", dev->cfg->i2c_mst_int_en );
+	printf("%-20s %d\n","DATA_RDY_EN BIT"	, dev->cfg->data_rdy_en );
+	printf("%-20s %d\n","raw[0]"		, dev->dat->raw[0] );
+	printf("----------------------------------------\n");
+	printf("ADDRESSES:\n");
+	printf("dat[1](%p) Ax=%p\n", (void *)dev->dat->dat[1], (void *)dev->Ax);
+	printf("dat[2](%p) Ay=%p\n", (void *)dev->dat->dat[2], (void *)dev->Ay);
+	printf("dat[3](%p) Az=%p\n", (void *)dev->dat->dat[3], (void *)dev->Az);
+	printf("dat[4](%p) t =%p\n", (void *)dev->dat->dat[4], (void *)dev->t);
+	printf("dat[5](%p) Gx=%p\n", (void *)dev->dat->dat[5], (void *)dev->Gx);
+	printf("dat[6](%p) Gy=%p\n", (void *)dev->dat->dat[6], (void *)dev->Gy);
+	printf("dat[7](%p) Gz=%p\n", (void *)dev->dat->dat[7], (void *)dev->Gz);
+	printf("----------------------------------------\n");
+	printf("ADDRESSES:\n");
+	printf("squ[1](%p) Ax=%p\n", (void *)&dev->dat->squ[1], (void *)dev->Ax2);
+	printf("squ[2](%p) Ay=%p\n", (void *)&dev->dat->squ[2], (void *)dev->Ay2);
+	printf("squ[3](%p) Az=%p\n", (void *)&dev->dat->squ[3], (void *)dev->Az2);
+	printf("squ[4](%p) t =%p\n", (void *)&dev->dat->squ[4], (void *)dev->t);
+	printf("squ[5](%p) Gx=%p\n", (void *)&dev->dat->squ[5], (void *)dev->Gx2);
+	printf("squ[6](%p) Gy=%p\n", (void *)&dev->dat->squ[6], (void *)dev->Gy2);
+	printf("squ[7](%p) Gz=%p\n", (void *)&dev->dat->squ[7], (void *)dev->Gz2);
+	printf("----------------------------------------\n");
+	printf("SCALING:\n");
+	printf("scl[1](%lf) %lf\n", dev->dat->scl[1], 1/dev->albs);
+	printf("scl[2](%lf) %lf\n", dev->dat->scl[2], 1/dev->albs);
+	printf("scl[3](%lf) %lf\n", dev->dat->scl[3], 1/dev->albs);
+	printf("scl[4](%lf) %lf\n", dev->dat->scl[4], 1/340.0);
+	printf("scl[5](%lf) %lf\n", dev->dat->scl[5], 1/dev->glbs);
+	printf("scl[6](%lf) %lf\n", dev->dat->scl[6], 1/dev->glbs);
+	printf("scl[7](%lf) %lf\n", dev->dat->scl[7], 1/dev->glbs);
+	printf("----------------------------------------\n");
+	return 0;
+}
+
+uint8_t mpu_regvalues[128];
+
+char mpu_regnames[ 128 ][ 32 ] = {
+[ AUX_VDDIO ]		= "AUX_VDDIO",
+[ XA_OFFS_USRH ] 	= "XA_OFFS_USRH",
+[ XA_OFFS_USRL ] 	= "XA_OFFS_USRL",
+[ YA_OFFS_USRH ] 	= "YA_OFFS_USRH",
+[ YA_OFFS_USRL ] 	= "YA_OFFS_USRL",
+[ ZA_OFFS_USRH ] 	= "ZA_OFFS_USRH",
+[ ZA_OFFS_USRL ] 	= "ZA_OFFS_USRL",
+[ XG_OFFS_USRH ] 	= "XG_OFFS_USRH",
+[ XG_OFFS_USRL ] 	= "XG_OFFS_USRL",
+[ YG_OFFS_USRH ] 	= "YG_OFFS_USRH",
+[ YG_OFFS_USRL ] 	= "YG_OFFS_USRL",
+[ ZG_OFFS_USRH ] 	= "ZG_OFFS_USRH",
+[ ZG_OFFS_USRL ]	= "ZG_OFFS_USRL",
+[ PROD_ID ] 		= "PROD_ID",
+[ SELF_TEST_X ] 	= "SELF_TEST_X",
+[ SELF_TEST_Y ]		= "SELF_TEST_Y",
+[ SELF_TEST_Z ]		= "SELF_TEST_Z",
+[ SELF_TEST_A ]		= "SELF_TEST_A",
+[ SMPLRT_DIV ]		= "SMPLRT_DIV",
+[ CONFIG ]		= "CONFIG",
+[ GYRO_CONFIG ]		= "GYRO_CONFIF",
+[ ACCEL_CONFIG ]	= "ACCEL_CONFIG",
+[ FF_THR ]		= "FF_THR",
+[ FF_DUR ]		= "FF_DUR",
+[ MOT_THR ]		= "MOT_THR",
+[ MOT_DUR ]		= "MOT_DUR",
+[ ZRMOT_THR ]		= "ZRMOT_THR",
+[ ZRMOT_DUR ]		= "ZRMOT_DUR",
+[ FIFO_EN ]		= "FIFO_EN",
+[ I2C_MST_CTRL ]	= "I2C_MST_CTRL",
+[ I2C_SLV0_ADDR ] 	= "I2C_SLV0_ADDR",
+[ I2C_SLV0_REG ]	= "I2C_SLV0_REG",
+[ I2C_SLV0_CTRL ] 	= "I2C_SLV0_CTRL",
+[ I2C_SLV1_ADDR ]	= "I2C_SLV1_ADDR",
+[ I2C_SLV1_REG ]	= "I2C_SLV1_REG",
+[ I2C_SLV1_CTRL ]	= "I2C_SLV1_CTRL",
+[ I2C_SLV2_ADDR ]	= "I2C_SLV2_ADDR",
+[ I2C_SLV2_REG ]	= "I2C_SLV2_REG",
+[ I2C_SLV2_CTRL ]	= "I2C_SLV2_CTRL",
+[ I2C_SLV3_ADDR ]	= "I2C_SLV3_ADDR",
+[ I2C_SLV3_REG ]	= "I2C_SLV3_REG",
+[ I2C_SLV3_CTRL ]	= "I2C_SLV3_CTRL",
+[ I2C_SLV4_ADDR ]	= "I2C_SLV4_ADDR",
+[ I2C_SLV4_REG ]	= "I2C_SLV4_REG",
+[ I2C_SLV4_DO ]		= "I2C_SLV4_DO",
+[ I2C_SLV4_CTRL ]	= "I2C_SLV4_CTRL",
+[ I2C_SLV4_DI ]		= "I2C_SLV4_DI",
+[ I2C_MAST_STATUS ]	= "I2C_MST_STATUS",
+[ INT_PIN_CFG ]		= "INT_PIN_CFG",
+[ INT_ENABLE ]		= "INT_ENABLE",
+[ DMP_INT_STATUS ] 	= "DMP_INT_STATUS",
+[ INT_STATUS ]		= "INT_STATUS",
+[ ACCEL_XOUT_H ] 	= "ACCEL_XOUT_H",
+[ ACCEL_XOUT_L ] 	= "ACCEL_XOUT_L",
+[ ACCEL_YOUT_H ] 	= "ACCEL_YOUT_H",
+[ ACCEL_YOUT_L ] 	= "ACCEL_YOUT_L",
+[ ACCEL_ZOUT_H ] 	= "ACCEL_ZOUT_H ",
+[ ACCEL_ZOUT_L ] 	= "ACCEL_ZOUT_L",
+[ TEMP_OUT_H ] 		= "TEMP_OUT_H",
+[ TEMP_OUT_L ] 		= "TEMP_OUT_L",
+[ GYRO_XOUT_H ] 	= "GYRO_XOUT_H",
+[ GYRO_XOUT_L ] 	= "GYRO_XOUT_L",
+[ GYRO_YOUT_H ] 	= "GYRO_YOUT_H",
+[ GYRO_YOUT_L ] 	= "GYRO_YOUT_L",
+[ GYRO_ZOUT_H ] 	= "GYRO_ZOUT_H",
+[ GYRO_ZOUT_L ] 	= "GYRO_ZOUT_L",
+[ EXT_SENS_DATA_00 ]	= "EXT_SENS_DATA_00",
+[ EXT_SENS_DATA_01 ]	= "EXT_SENS_DATA_01",
+[ EXT_SENS_DATA_02 ]	= "EXT_SENS_DATA_02",
+[ EXT_SENS_DATA_03 ]	= "EXT_SENS_DATA_03",
+[ EXT_SENS_DATA_04 ]	= "EXT_SENS_DATA_04",
+[ EXT_SENS_DATA_05 ]	= "EXT_SENS_DATA_05",
+[ EXT_SENS_DATA_06 ]	= "EXT_SENS_DATA_06",
+[ EXT_SENS_DATA_07 ]	= "EXT_SENS_DATA_07",
+[ EXT_SENS_DATA_08 ]	= "EXT_SENS_DATA_08",
+[ EXT_SENS_DATA_09 ]	= "EXT_SENS_DATA_09",
+[ EXT_SENS_DATA_10 ]	= "EXT_SENS_DATA_10",
+[ EXT_SENS_DATA_11 ]	= "EXT_SENS_DATA_11",
+[ EXT_SENS_DATA_12 ]	= "EXT_SENS_DATA_12",
+[ EXT_SENS_DATA_13 ]	= "EXT_SENS_DATA_13",
+[ EXT_SENS_DATA_14 ]	= "EXT_SENS_DATA_14",
+[ EXT_SENS_DATA_15 ]	= "EXT_SENS_DATA_15",
+[ EXT_SENS_DATA_16 ]	= "EXT_SENS_DATA_16",
+[ EXT_SENS_DATA_17 ]	= "EXT_SENS_DATA_17",
+[ EXT_SENS_DATA_18 ]	= "EXT_SENS_DATA_18",
+[ EXT_SENS_DATA_19 ]	= "EXT_SENS_DATA_19",
+[ EXT_SENS_DATA_20 ]	= "EXT_SENS_DATA_20",
+[ EXT_SENS_DATA_21 ]	= "EXT_SENS_DATA_21",
+[ EXT_SENS_DATA_22 ]	= "EXT_SENS_DATA_22",
+[ EXT_SENS_DATA_23 ]	= "EXT_SENS_DATA_23",
+[ MOT_DETECT_STATUS ]	= "MOT_DETECT_STATUS",
+[ I2C_SLV0_DO ]		= "I2C_SLV0_DO",
+[ I2C_SLV1_DO ]		= "I2C_SLV1_DO",
+[ I2C_SLV2_DO ]		= "I2C_SLV2_DO",
+[ I2C_SLV3_DO ]		= "I2C_SLV0_DO",
+[ I2C_MST_DELAY_CTRL ]	= "I2C_MST_DELAY_CTRL",
+[ SIGNAL_PATH_RESET ]	= "SIGNAL_PATH_RESET",
+[ MOT_DETECT_CTRL ]	= "MOT_DETECT_CTRL",
+[ USER_CTRL ]		= "USER_CTRL",
+[ PWR_MGMT_1 ]		= "PWR_MGMT_1",
+[ PWR_MGMT_2 ]		= "PWR_MGMT_2",
+[ MEM_R_W ] 		= "MEM_R_W",
+[ BANK_SEL ] 		= "BANK_SEL",
+[ MEM_START_ADDR ] 	= "MEM_START_ADDR",
+[ PRGM_START_H ] 	= "PRGM_START_H",
+[ PRGM_START_L ] 	= "PRGM_START_L",
+[ FIFO_COUNT_H ]	= "FIFO_COUNT_H",
+[ FIFO_COUNT_L ]	= "FIFO_COUNT_L",
+[ FIFO_R_W ]		= "FIFO_R_W",
+[ WHO_AM_I ]		= "WHO_AM_I",
+};
+
+int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
+{
+	if(NULL == fn) {
+		fprintf(stderr, "%s failed: NULL filename\n", __func__);
+		return -1;
+	}
+		
+	FILE *fp;
+	if ( (fp = fopen(fn, "w+")) == NULL) {
+		fprintf(stderr, "%s failed: Unable to open file \"%s\"\n", __func__, fn);
+		return -1;
+	}
+
+	fprintf(fp, "MPU REGISTER DUMP\n");
+	fprintf(fp,"%8s %8s %20s %4s", "reg(hex)", "reg(dec)", "name", "val");
+
+	uint8_t regs[128][3];
+	for (int i = 0; i < 128; i++) {
+		regs[i][0] = i;
+		regs[i][1] = mpu_read_byte(dev, i, &regs[i][0]);
+		fprintf(fp, " %2x     %3d    %-20s %2x\n",
+			regs[i][0], 
+			regs[i][0], 
+			mpu_regnames[i], 
+			regs[i][1]);
+	}
+	fflush(fp);
+	fclose(fp);
+	return 0;
+}
+
+#include <i2c/smbus.h> 		/* for i2c_smbus_x */
+#include <linux/i2c.h> 		/* for i2c_smbus_x */
+#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
+#include <sys/types.h>
+
+static int mpu_read_byte(struct mpu_dev * const dev,
+		const mpu_reg_t reg,
+		mpu_reg_t *val)
+{
+	if ((NULL == dev) || (NULL == dev->bus))
+		return -1;
+
+	__s32 res = i2c_smbus_read_byte_data(*(dev->bus), reg);
+
+	if (res < 0) /* read failed - bus error */
+		return -1;
+
+	*val = (mpu_reg_t) res;
+	return 0;
+	
+}
+
+static int mpu_write_byte(struct mpu_dev * const dev,
+		const mpu_reg_t reg,
+		const mpu_reg_t val)
+{
+	if ((NULL == dev) || (NULL == dev->bus))
+		return -1;
+
+	__s32 res = i2c_smbus_write_byte_data(*(dev->bus), reg, val);
+
+	if (res < 0) /* read failed - bus error */
+		return -1;
+
+	return 0;
+	
+}
+
+static int mpu_read_word(struct mpu_dev * const dev,
+		const mpu_reg_t reg,
+		mpu_word_t *val)
+{
+	if ((NULL == dev) || (NULL == dev->bus))
+		return -1;
+
+	__s32 res = i2c_smbus_read_word_data(*(dev->bus), reg);
+
+	if (res < 0) /* write byte failed - bus error */
+		return -1;
+
+	*val = (mpu_word_t) res;
+	return 0;
+	
+}
+
+static int __attribute__((unused)) mpu_write_word(struct mpu_dev * const dev,
+		const mpu_reg_t reg,
+		const mpu_word_t val)
+{
+	if ((NULL == dev) || (NULL == dev->bus))
+		return -1;
+
+	__s32 res = i2c_smbus_write_word_data(*(dev->bus), reg, val);
+
+	if (res < 0) /* write word failed - bus error */
+		return -1;
+
+	return 0;
+	
+}
