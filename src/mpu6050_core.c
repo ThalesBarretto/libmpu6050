@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT 
+/* Copyright (C) 2021 Thales Antunes de Oliveira Barretto */
+
 #include "mpu6050_core.h"
 #include "mpu6050_regs.h"
 

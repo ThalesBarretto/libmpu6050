@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT 
+/* Copyright (C) 2021 Thales Antunes de Oliveira Barretto */
 #ifdef __cplusplus
 	extern "C" {
 #endif
@@ -48,9 +50,9 @@ struct mpu_dev;
  * 	Temperature sensor	- enable/disable
  * 	Sampling rate control 	- 10,20,25,50,100,200 Hz
  * 	Digital Low Pass filter	- refer to datasheet
- * 	Self-tests		- refer to datasheet
- * 	Register dump
- * 	Calibration
+ * 	Self-tests		- refer to datasheet, write report to file
+ * 	Register dump		- write register values to file
+ * 	Calibration		- device must stay leveled and static
  *
  * Unsupported features
  * 	eDMP (embedded Digital Motion Proccessor) - proprietary blob
