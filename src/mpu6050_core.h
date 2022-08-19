@@ -81,7 +81,7 @@ int mpu_get_data	(struct mpu_dev * mpudev);
 int mpu_ctl_calibrate	(struct mpu_dev *dev);
 int mpu_ctl_reset	(struct mpu_dev *dev);
 int mpu_ctl_dump	(struct mpu_dev *dev, char *filename);
-int mpu_ctl_selftes	(struct mpu_dev *dev, char *filename);
+int mpu_ctl_selftest	(struct mpu_dev *dev, char *filename);
 int mpu_ctl_samplerate	(struct mpu_dev *dev, unsigned int hertz);
 int mpu_ctl_dlpf	(struct mpu_dev *dev, unsigned int dlpf);
 int mpu_ctl_accel_range	(struct mpu_dev *dev, unsigned int range);
