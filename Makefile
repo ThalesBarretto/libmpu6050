@@ -46,6 +46,17 @@ $(TST)/test_%: $(SRC)/test_%.c $(SRC)/%.c | $(OBJS) $(TST)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LIBS)
 	$@
 
+manpages:
+	-cd man && make && cd ..
+
+manpages_install:
+	-cd man && make install && cd ..
+
+manpages_uninstall:
+	-cd man && make uninstall && cd ..
+
+manpages_clean:
+	-cd man && make clean && cd ..
 
 partial: $(OBJS)
 	ld -r $^ -o $(BLD)/$(MODULE).o
@@ -61,12 +72,12 @@ test: $(TSTB)
 
 module: partial static shared
 
-all:  test module
+all:  test module manpages
 
-clean:
+clean: manpages_clean
 	rm -rf $(BLD) $(BLD)
 
-install:
+install: manpages_install
 	sudo $(INSTALL) -d --owner=root --group=root $(INSTDIR)/lib$(MODULE)
 	sudo cp -r $(wildcard $(BLD)/*) $(INSTDIR)/lib$(MODULE)
 	sudo $(INSTALL) -D --owner=root --group=root $(BLD)/lib$(MODULE).so $(LIBDIR)/lib$(MODULE).so.$(APIV).$(MODV)
@@ -77,7 +88,7 @@ install:
 	sudo mkdir -p $(INCDIR)/lib$(MODULE)
 	sudo cp -r $(HDRS) $(INCDIR)/lib$(MODULE)
 
-uninstall:
+uninstall: manpages_uninstall
 	sudo rm -rf $(INSTDIR)/lib$(MODULE)
 	sudo rm $(LIBDIR)/lib$(MODULE).so.$(APIV).$(MODV)
 	sudo rm $(LIBDIR)/lib$(MODULE).so.$(APIV)
