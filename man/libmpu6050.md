@@ -260,7 +260,7 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 *EXAMPLE*
 ```
-	mpu_get_dump(dev, "mydumpfile.txt");
+	mpu_ctl_dump(dev, "mydumpfile.txt");
 ```
 
 
@@ -280,7 +280,7 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 *EXAMPLE*
 ```
-	mpu_get_dump(dev, "mytestreport.txt");
+	mpu_ctl_selftest(dev, "mytestreport.txt");
 ```
 
 
