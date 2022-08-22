@@ -70,4 +70,8 @@ All functions are thread-unsafe. One should not multithread with libmpu6050 func
 
 ## Contributing
 
-* Please send pull requests on github.
+Contributions are welcome on github, on three channels:
+
+* Open an [issue](<https://github.com/ThalesBarretto/libmpu6050/issues>).
+* Start or enter a [discussion](<https://github.com/ThalesBarretto/libmpu6050/discussions>).
+* Send a [pull request](<https://github.com/ThalesBarretto/libmpu6050/pulls>).
