@@ -48,7 +48,7 @@ struct mpu_dev;
  * 	Accelerometer		- enable/disable, range setting
  * 	Gyroscope 	  	- enable/disable, range setting
  * 	Temperature sensor	- enable/disable
- * 	Sampling rate control 	- 10,20,25,50,100,200 Hz
+ * 	Sampling rate control 	- 50,100,200, 250, 500 Hz
  * 	Digital Low Pass filter	- refer to datasheet
  * 	Self-tests		- refer to datasheet, write report to file
  * 	Register dump		- write register values to file
