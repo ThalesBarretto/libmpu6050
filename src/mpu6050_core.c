@@ -299,7 +299,7 @@ static int mpu_cfg_recover (struct mpu_dev * dev)
 }
 
 
-int mpu_destroy(struct mpu_dev * dev)
+int mpu_destroy(struct mpu_dev *dev)
 {
 	
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */

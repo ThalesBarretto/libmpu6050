@@ -28,12 +28,12 @@ SYNOPSIS
 *FUNCTIONS*
 
 `int` *mpu_init*`(const char * const ` *path*`,`
-`	    	struct mpu_dev **`*mpudev*`,`
+`		struct mpu_dev **`*mpudev*`,`
 ` 		const int` *mode*`);`
 
-`int` *mpu_destroy*`(struct mpu_dev *`*mpudev*`);`
+`int` *mpu_destroy*`(struct mpu_dev *`*dev*`);`
 
-`int` *mpu_get_data*`(struct mpu_dev *`*mpudev*`);`
+`int` *mpu_get_data*`(struct mpu_dev *`*dev*`);`
 
 `int` *mpu_ctl_calibrate*`(struct mpu_dev *`*dev*`);`
 
@@ -158,11 +158,11 @@ See mpu6050-demo for an in-depth example and use case.
 `	    	struct mpu_dev **`*mpudev*`,`
 ` 		const int` *mode*`)`
 
-handles device initialization. 
+handles device initialization.
 
 - *path* is the filesystem path for the i2c bus, ideally *"/dev/i2c-1"*
 
-- *\*\*mpudev* is a pointer to a pointer to an allocated *struct mpu_dev* 
+- *\*\*mpudev* is a pointer to a pointer to an unallocated *struct mpu_dev* assigned with  *NULL*
 
 - *mode* is either *MPU6050_RESET* or *MPU6050_RESTORE* where you can choose to performe a device reset on initialization or try to recover the last saved configuration for the device.
 
@@ -178,11 +178,11 @@ Upon *FAILURE(1)* the \*\*dev contents are not modified.
 		abort();
 ```
 
-`int` *mpu_destroy*`(struct mpu_dev *`*mpudev*`)`
+`int` *mpu_destroy*`(struct mpu_dev *`*dev*`)`
 
 frees the memory and releases the bus.
 
-- *mpudev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* bus is freed and *dev* memory deallocated.
 
@@ -194,7 +194,7 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 ```
 
 
-`int` *mpu_get_data*`(struct mpu_dev *`*mpudev*`)`
+`int` *mpu_get_data*`(struct mpu_dev *`*dev*`)`
 
 Updates the device data structure with the next reading from the sensors. The data can be retrived at *\*(mpudev->Ax)*, *\*(mpudev->Ay)*, etc. You should continously call `mpu_get_data()` to avoid the device buffer overflow, which would cause the reading count to start from zero.
 
@@ -207,7 +207,7 @@ The embedded buffer on the MPU6050 will collect samples at exact sample rate, so
 	mpu_get_data(dev);
 ```
 
-- *mpudev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* new data is available
 
@@ -218,7 +218,7 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 Performs a simple calibration routing that lasts for about ten seconds. During the procedure the device must rest still and leveled. After the calibration the device registers will be updated and the config file will be written with the adequate values and offsets.  It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* device calibration registers and file are updated
 
@@ -234,7 +234,7 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 Performs a devices reset and puts the device into standard configuration. It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* device performed reset and has standard configuration
 
@@ -250,9 +250,9 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 Dumps the device register values to a file. Please refer to the device datasheet and documentation for more info on the register value meaning. It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
-- *filename* is a filsystem path to the filename 
+- *filename* is a filsystem path to the filename.
 
 Upon *SUCCESS(0)* dump file has been written
 
@@ -269,9 +269,9 @@ Upon *FAILURE(1)* there was a bus error, you should abort and check.
 
 Performs a device self test and dumps the results to a file. Please refer to device documentation for more info. It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
-- *filename* is a filsystem path to the filename 
+- *filename* is a filsystem path to the filename.
 
 Upon *SUCCESS(0)* device finished self-test and report file has been written
 
@@ -305,7 +305,7 @@ Upon *FAILURE(1)* invalid setting or  bus error.
 
 Changes the DLPF setting value that changes the embedded Digital Low Pass Filter. A value of 0 means the filter is disabled, while values 1-6 progressively increase the filtering effort, while reducing bandwidth.  It is a synchronoous operations, which means that the function returns only after the requested operation completed. Please refer to the device datasheet.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 - *dkpf* is the desired DLPF value [0-3]
 
@@ -324,7 +324,7 @@ Upon *FAILURE(1)* invalid setting or  bus error.
 
 Sets the Accelerometer range and sensitivity, with values 2, 4, 8 and 16 meaning the range of the reported reading will be between +-2G, +-4G, +-8G and +-16G. The device has an internal resolution of 16-bit, which can impair the effective resolution, but the library converts all data to appropriate *mpu_data_t*.  It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* device acceleromter range seetings are updated
 
@@ -339,7 +339,7 @@ Upon *FAILURE(1)* invalid setting or  bus error.
 
 Sets the Gyroscope range and sensitivity, with values 250, 500, 1000 and 2000 meaning the range of the reported reading will be between +-250dps, +-500dps, +-1000dps and +-2000dps. The device has an internal resolution of 16-bit, which can impair the effective resolution, but the library converts all data to appropriate *mpu_data_t*.  It is a synchronoous operations, which means that the function returns only after the requested operation completed.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 Upon *SUCCESS(0)* device gyroscope range settings are updated
 
@@ -354,7 +354,7 @@ Upon *FAILURE(1)* invalid setting or  bus error.
 
 Sets the internal clock source register values [0-3] to use the appropriate device clock reference. The most sensible setting is [3]. To use one of the gyroscopes clock: [1] for X-axis gyroscope, [2] for Y-axis gyroscope and [3] for Z-axis gyroscope. Using the value [0] will select the internal 8Mhz oscillator which can negatively impact the sampling rate capabilities and the device responsiveness.  It is a synchronoous operations, which means that the function returns only after the requested operation completed. Please refer to the product datasheet and documentation for more details.
 
-- *dev* is a pointer to an initialized *struct mpu_dev* 
+- *dev* is a pointer to an initialized *struct mpu_dev*.
 
 - *clksel* is the desired CLKSEL register value [0-3]
 
@@ -389,19 +389,19 @@ The readings (*X*,*Y*,*Z*) are reported as follows.
 |   /           /.                          |
 |  /___________/.                           |
 |  '...........'                            |
- ------------------------------------------- 
+ -------------------------------------------.
 
 ```
 
 The sensor data from `struct mpu_dev *dev` available at:
 
-* Accelerometers: 
+* Accelerometers:
 	* X-axis (G's): *\*(dev->Ax)* squared: *\*(dev->Ax2)*
 	* Y-axis (G's): *\*(dev->Ay)* squared: *\*(dev->Ay2)*
 	* Z-axis (G's): *\*(dev->Az)* squared: *\*(dev->Az2)*
 	* TOTAL acceleration (G's): *\*(dev->AM)*
 
-* Gyroscopes: 
+* Gyroscopes:
 	* X-axis (dps): *\*(dev->Gx)* squared: *\*(dev->Gx2)*
 	* Y-axis (dps): *\*(dev->Gy)* squared: *\*(dev->Gy2)*
 	* Z-axis (dps): *\*(dev->Gz)* squared: *\*(dev->Gz2)*
