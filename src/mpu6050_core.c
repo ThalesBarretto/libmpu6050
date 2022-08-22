@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 /* Copyright (C) 2021 Thales Antunes de Oliveira Barretto */
-
 #include "mpu6050_core.h"
 #include "mpu6050_regs.h"
 
@@ -14,6 +13,9 @@
 #include <sys/types.h>		/* for ssize_t */
 #include <sys/ioctl.h>		/* for ioctl() */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
+#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
+#include <i2c/smbus.h> 		/* for i2c_smbus_x */
+#include <linux/i2c.h> 		/* for i2c_smbus_x */
 
 struct mpu_cal {
 	mpu_data_t gra;		/* mean(sqrt(ax2,ay2,az2)[])		*/
@@ -207,39 +209,39 @@ int mpu_init(	const char * const restrict path,
 
 	
 	struct mpu_dev *dev = NULL;
-	if ((mpu_dev_allocate(&dev)) < 0) /* no memory allocated */
+	if (mpu_dev_allocate(&dev) < 0) /* no memory allocated */
 		return -1;
 
 	
-	if ((mpu_dev_bind(path, MPU6050_ADDR, dev)) < 0) /* could't bind */
+	if (mpu_dev_bind(path, MPU6050_ADDR, dev) < 0) /* could't bind */
 		goto mpu_init_error;
 	
-	if ((mpu_ctl_wake(dev)) < 0) /* wake up failed */
+	if (mpu_ctl_wake(dev) < 0) /* wake up failed */
 		goto mpu_init_error;
 	
-	if ((mpu_cfg_set_CLKSEL(dev, CLKSEL_3)) < 0)
+	if (mpu_cfg_set_CLKSEL(dev, CLKSEL_3) < 0)
 		goto mpu_init_error;
 	
 	
-	if ((mpu_dat_reset(dev)) < 0) /* clean data pointers */
+	if (mpu_dat_reset(dev) < 0) /* clean data pointers */
 		goto mpu_init_error;
 
 
 	switch (mode) {	
 		case MPU6050_RESET:
-			if ((mpu_cfg_reset(dev)) < 0) /* assign default config */
+			if (mpu_cfg_reset(dev) < 0) /* assign default config */
 				goto mpu_init_error;
-			if ((mpu_cal_reset(dev)) < 0) /* assign unity gain, zero errors */
+			if (mpu_cal_reset(dev) < 0) /* assign unity gain, zero errors */
 				goto mpu_init_error;
 
-			if ((mpu_cfg_set(dev)) < 0) /* assign default config */
+			if (mpu_cfg_set(dev) < 0) /* assign default config */
 				goto mpu_init_error;
 			break;
 
 		case MPU6050_RESTORE:
 			mpu_dev_parameters_restore(MPU6050_CFGFILE, dev); /* read config from device */
 			/* fill device structure */
-			if ((mpu_cfg_parse(dev)) < 0)
+			if (mpu_cfg_parse(dev) < 0)
 				return -1;
 			break;
 		default:
@@ -248,10 +250,10 @@ int mpu_init(	const char * const restrict path,
 	}
 
 
-	if ((mpu_dat_set(dev)) < 0) /* assign data pointers */
+	if (mpu_dat_set(dev) < 0) /* assign data pointers */
 		goto mpu_init_error;
 
-	if ((mpu_read_byte(dev, PROD_ID, &(dev->prod_id))) < 0) /* get product id */
+	if (mpu_read_byte(dev, PROD_ID, &(dev->prod_id)) < 0) /* get product id */
 		goto mpu_init_error;
 	
 	if (mpu_ctl_fifo_flush(dev) < 0) /* DONT FORGET TO FLUSH FIFO */
@@ -268,7 +270,7 @@ mpu_init_error:
 	}
 
 	
-	if ((mpu_destroy(dev)) < 0) /* cleanup failed, check for bugs */
+	if (mpu_destroy(dev) < 0) /* cleanup failed, check for bugs */
 		exit(EXIT_FAILURE);
 
 	return -1;
@@ -290,7 +292,7 @@ static int mpu_cfg_recover (struct mpu_dev *dev)
 		if (0 == dev->cfg->cfg[i][0]) /* invalid register */
 			continue;
 
-		if ((mpu_read_byte(dev, dev->cfg->cfg[i][0], &dev->cfg->cfg[i][1])) < 0) /* read error */
+		if (mpu_read_byte(dev, dev->cfg->cfg[i][0], &dev->cfg->cfg[i][1]) < 0) /* read error */
 			return -1;
 
 	}
@@ -324,7 +326,7 @@ int mpu_ctl_wake(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, PWR_MGMT_1, &val)) < 0) { /* unconfigured */
+	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0) { /* unconfigured */
 		if (mpu_write_byte(dev, PWR_MGMT_1, 0x00) < 0) { /* write failed */
 			return -1;
 		} else {
@@ -334,16 +336,16 @@ int mpu_ctl_wake(struct mpu_dev *dev)
 
 	/* clear DEVICE_RESET, SLEEP and CYCLE bits */
 	val &= (mpu_reg_t) ~(DEVICE_RESET_BIT | SLEEP_BIT | CYCLE_BIT);
-	if ((mpu_cfg_set_val(dev, PWR_MGMT_1, val)) < 0)
+	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
 		return -1;
 
 	/* cleaer all STDBY bits */
-	if ((mpu_cfg_set_val(dev, PWR_MGMT_2, 0x00)) < 0)
+	if (mpu_cfg_set_val(dev, PWR_MGMT_2, 0x00) < 0)
 		return -1;
 
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 	
 	return 0;
@@ -373,14 +375,14 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 	}
 	
 	mpu_reg_t val;
-	if ((mpu_read_byte(dev, PWR_MGMT_1, &val)) < 0)
+	if (mpu_read_byte(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 	
-	val  &= (~CLKSEL_BIT); /* mask CLK_SEL bits */
+	val  &= ~CLKSEL_BIT; /* mask CLK_SEL bits */
 	
 	val  |= clksel;	 /* set  CLK_SEL bits */
 
-	if ((mpu_write_byte(dev, PWR_MGMT_1, val)) < 0)
+	if (mpu_write_byte(dev, PWR_MGMT_1, val) < 0)
 		return -1;
 
 	return 0;
@@ -407,23 +409,23 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 	
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
 	
-	if ((mpu_cfg_get_val(dev, CONFIG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, CONFIG, &val) < 0)
 		return -1;
-	val &= ~(DLPF_CFG_BIT);
+	val &= ~DLPF_CFG_BIT;
 	val |= (dlpf & DLPF_CFG_BIT);
 
-	if ((mpu_cfg_set_val(dev, CONFIG, val)) < 0)
+	if (mpu_cfg_set_val(dev, CONFIG, val) < 0)
 		return -1;
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 
 	dev->dlpf = dlpf;
 
 	unsigned int new_rate_hz = (unsigned int)dev->sr;
 	if (old_rate_hz != new_rate_hz) {
-		if ((mpu_ctl_samplerate(dev, old_rate_hz)) < 0)
+		if (mpu_ctl_samplerate(dev, old_rate_hz) < 0)
 			return -1;
 	}
 	
@@ -453,7 +455,7 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 	
 	/* get DLPF_CFG value */
 	mpu_reg_t val;
-	if ((mpu_read_byte(dev, CONFIG, &val)) < 0)
+	if (mpu_read_byte(dev, CONFIG, &val) < 0)
 		return -1;
 	
 	unsigned int fs_base = (val & DLPF_CFG_BIT) ? 1000 : 8000;
@@ -462,11 +464,11 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 	
 	val = (mpu_reg_t) (divider - 1); /* rate_hz = fs_base / (1 + SMPLRT_DIV) */
 	
-	if ((mpu_cfg_set_val(dev, SMPLRT_DIV, val)) < 0)
+	if (mpu_cfg_set_val(dev, SMPLRT_DIV, val) < 0)
 		return -1;
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 	
 	return 0;
@@ -490,7 +492,7 @@ int mpu_ctl_accel_range(struct mpu_dev *dev, unsigned int range)
 	mpu_reg_t reg = ACCEL_CONFIG;
 	mpu_reg_t val;
 	
-	if ((mpu_read_byte(dev, reg, &val)) < 0)
+	if (mpu_read_byte(dev, reg, &val) < 0)
 		return -1;
 	
 	val &= (~AFS_SEL_BIT);  /* mask bits */
@@ -526,18 +528,18 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 	}
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, GYRO_CONFIG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
 
 	val &= (~FS_SEL_BIT);  /* mask bits */
 	val |= fs_sel; 		/* set bits */
 
-	if ((mpu_cfg_set_val(dev, GYRO_CONFIG, val)) < 0)
+	if (mpu_cfg_set_val(dev, GYRO_CONFIG, val) < 0)
 		return -1;
 
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 	if (mpu_ctl_fifo_flush(dev) < 0)
 	       return -1;	
@@ -551,21 +553,21 @@ static int __attribute__((unused)) mpu_ctl_temperature(struct mpu_dev *dev, bool
 		return -1;
 
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, PWR_MGMT_1, &val)) < 0)
+	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 	
 	if (temp_on)
-		val &= (~TEMP_DIS_BIT); /* temperature sensor on */
+		val &= ~TEMP_DIS_BIT; /* temperature sensor on */
 	else
 		val |= TEMP_DIS_BIT;    /* temperature sensor off */
 
 	
-	if ((mpu_cfg_set_val(dev, PWR_MGMT_1, val)) < 0)
+	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
 		return -1;
 	
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 	if (mpu_ctl_fifo_flush(dev) < 0)
 	       return -1;	
@@ -591,20 +593,20 @@ int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, PWR_MGMT_1, &val)) < 0)
+	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 
 	val  &= (~CLKSEL_BIT); /* mask CLK_SEL bits */
 	val  |= clksel;	 /* set  CLK_SEL bits */
 
 	
-	if ((mpu_cfg_set_val(dev, PWR_MGMT_1, val)) < 0)
+	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
 		return -1;
 
 	
-	if ((mpu_cfg_set(dev)) < 0)
+	if (mpu_cfg_set(dev) < 0)
 		return -1;
-	if ((mpu_dat_set(dev)) < 0)
+	if (mpu_dat_set(dev) < 0)
 		return -1;
 
 	
@@ -621,7 +623,7 @@ static int mpu_cfg_reset(struct mpu_dev *dev)
 	memcpy((void *)dev->cfg, (void *)&mpu6050_defcfg, sizeof(struct mpu_cfg));
 
 	
-	if ((mpu_cfg_set(dev)) < 0) /* couldn't set config */
+	if (mpu_cfg_set(dev) < 0) /* couldn't set config */
 		return -1;
 
 	
@@ -635,15 +637,15 @@ static int mpu_cfg_set(struct mpu_dev *dev)
 		return -1;
 
 	/* write config to device registers */
-	if ((mpu_cfg_write(dev)) < 0)
+	if (mpu_cfg_write(dev) < 0)
 		return -1;
 
 	/* ensure device is configured */
-	if ((mpu_cfg_validate(dev)) < 0)
+	if (mpu_cfg_validate(dev) < 0)
 		return -1;
 
 	/* fill device structure */
-	if ((mpu_cfg_parse(dev)) < 0)
+	if (mpu_cfg_parse(dev) < 0)
 		return -1;
 
 
@@ -690,7 +692,7 @@ static int mpu_cfg_validate(struct mpu_dev *dev)
 		mpu_reg_t reg 	  = dev->cfg->cfg[i][0];
 		mpu_reg_t cfg_val = dev->cfg->cfg[i][1];
 		
-		if ((mpu_read_byte(dev, reg, &dev_val)) < 0) /* read error */
+		if (mpu_read_byte(dev, reg, &dev_val) < 0) /* read error */
 			return -1;
 
 		
@@ -766,10 +768,10 @@ static int mpu_cfg_parse_PWR_MGMT(struct mpu_dev *dev)
 	mpu_reg_t val1;
 	mpu_reg_t val2;
 	
-	if ((mpu_cfg_get_val(dev, PWR_MGMT_1, &val1)) < 0)
+	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val1) < 0)
 		return -1;
 	
-	if ((mpu_cfg_get_val(dev, PWR_MGMT_2, &val2)) < 0)
+	if (mpu_cfg_get_val(dev, PWR_MGMT_2, &val2) < 0)
 		return -1;
 	
 	if (val1 & DEVICE_RESET_BIT) /* must not be set */
@@ -812,7 +814,7 @@ static int mpu_cfg_parse_USER_CTRL(struct mpu_dev *dev)
 		return -1;
 
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, USER_CTRL, &val)) < 0)
+	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
 	if (val & FIFO_RESET_BIT) {
 		//printf("FIFO_RESET_BIT set \n");
@@ -845,7 +847,7 @@ static int mpu_cfg_parse_FIFO_EN(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, FIFO_EN, &val)) < 0)
+	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
 
 	bool temp_fifo_en  = false;
@@ -891,7 +893,7 @@ static int mpu_cfg_parse_ACCEL_CONFIG(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, ACCEL_CONFIG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
 		return -1;
 
 	dev->cfg->xa_st = (val & XA_ST_BIT) ? true : false;
@@ -918,7 +920,7 @@ static int mpu_cfg_parse_GYRO_CONFIG(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, GYRO_CONFIG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
 
 	dev->cfg->xg_st = (val & XG_ST_BIT) ? true : false;
@@ -946,7 +948,7 @@ static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, CONFIG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, CONFIG, &val) < 0)
 		return -1;
 
 	/* ignore EXT_SYNC_SET to avoid complicating senors readings */
@@ -1008,7 +1010,7 @@ static int mpu_cfg_parse_SMPLRT_DIV(struct mpu_dev *dev)
 
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, SMPLRT_DIV, &val)) < 0)
+	if (mpu_cfg_get_val(dev, SMPLRT_DIV, &val) < 0)
 		return -1;
 
 	
@@ -1033,7 +1035,7 @@ static int mpu_cfg_parse_INT_PIN_CFG(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, INT_PIN_CFG, &val)) < 0)
+	if (mpu_cfg_get_val(dev, INT_PIN_CFG, &val) < 0)
 		return -1;
 
 	if (val & FSYNC_INT_EN_BIT) /* FSYNC_INT_EN not supported */
@@ -1050,7 +1052,7 @@ static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 		return -1;
 	
 	mpu_reg_t val;
-	if ((mpu_cfg_get_val(dev, INT_ENABLE, &val)) < 0)
+	if (mpu_cfg_get_val(dev, INT_ENABLE, &val) < 0)
 		return -1;
 
 	bool i2c_mst_en	   = false;
@@ -1275,23 +1277,23 @@ static int mpu_cfg_parse(struct mpu_dev *dev)
 	if ((NULL == dev) || (NULL == dev->cfg))
 		return -1;
 
-	if ((mpu_cfg_parse_PWR_MGMT(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_FIFO_EN(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_ACCEL_CONFIG(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_GYRO_CONFIG(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_CONFIG(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_SMPLRT_DIV(dev)) < 0)
-		return -1;
-	if ((mpu_cfg_parse_USER_CTRL(dev)) < 0)
-		return -1;
-	if ((mpu_cfg_parse_INT_PIN_CFG(dev)) < 0 )
-	         return -1;
-	if ((mpu_cfg_parse_INT_ENABLE(dev)) < 0 )
+	if (mpu_cfg_parse_PWR_MGMT(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_FIFO_EN(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_ACCEL_CONFIG(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_GYRO_CONFIG(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_CONFIG(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_SMPLRT_DIV(dev) < 0)
+	       return -1;
+	if (mpu_cfg_parse_USER_CTRL(dev) < 0)
+	       return -1;
+	if (mpu_cfg_parse_INT_PIN_CFG(dev) < 0 )
+	        return -1;
+	if (mpu_cfg_parse_INT_ENABLE(dev) < 0 )
 	         return -1;
 
 	return 0;
@@ -1373,7 +1375,7 @@ static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_de
 	if ((NULL == dev) || (NULL == dev->bus)) /* invalid pointers */
 		return -1;
 	
-	if ((address == (mpu_reg_t)0x00)) /* invalid address */
+	if (address == (mpu_reg_t)0x00) /* invalid address */
 		return -1;
 	
 	size_t pathlen = strlen(path);
@@ -1386,7 +1388,7 @@ static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_de
 		return -1;	
 
 	/* From now on, fails must close the file descritor */
-	if ((ioctl(fd, I2C_SLAVE, address)) < 0) /* bus error */
+	if (ioctl(fd, I2C_SLAVE, address) < 0) /* bus error */
 		goto dev_bind_exit;
 
 	/* success */
@@ -1422,7 +1424,7 @@ static int mpu_ctl_fifo_data(struct mpu_dev *dev)
 		return 0;
 	}
 
-	if ((mpu_ctl_fifo_count(dev)) < 0)
+	if (mpu_ctl_fifo_count(dev) < 0)
 		return -1;
 
 	if (dev->fifocnt > dev->fifomax) { /* buffer overflow */
@@ -1472,7 +1474,7 @@ int mpu_ctl_fifo_count(struct mpu_dev *dev)
 		return -1;
 
 	uint16_t tem = 0;
-	if ((mpu_read_word(dev, FIFO_COUNT_H, &tem)) < 0)
+	if (mpu_read_word(dev, FIFO_COUNT_H, &tem) < 0)
 		return -1;
 
 	uint16_t buf = (tem << 8) | (tem >> 8);
@@ -1489,7 +1491,7 @@ int mpu_ctl_fifo_flush(struct mpu_dev *dev)
 	uint8_t dat = 0;
        	mpu_ctl_fifo_count(dev);
 	for (int i = 0; i < dev->fifocnt; i++) {
-		if ((mpu_read_byte(dev, FIFO_R_W, &dat)) < 0)
+		if (mpu_read_byte(dev, FIFO_R_W, &dat) < 0)
 			return -1;
 	}
 	dev->samples = 0;
@@ -2463,11 +2465,6 @@ int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 	fclose(fp);
 	return 0;
 }
-
-#include <i2c/smbus.h> 		/* for i2c_smbus_x */
-#include <linux/i2c.h> 		/* for i2c_smbus_x */
-#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
-#include <sys/types.h>
 
 static int mpu_read_byte(struct mpu_dev * const dev,
 		const mpu_reg_t reg,
