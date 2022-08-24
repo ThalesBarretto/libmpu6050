@@ -142,6 +142,7 @@ extern int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
  */
 
 /* level 3 - basic controls */
+static int mpu_diagnose(struct mpu_dev *dev);
 static int mpu_ctl_selftest_enable_accel (struct mpu_dev *dev);
 static int mpu_ctl_selftest_enable_gyro  (struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
@@ -149,17 +150,17 @@ static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
 static int mpu_ctl_wake(struct mpu_dev *dev);
 static int mpu_ctl_fifo_count(struct mpu_dev *dev);
 static int mpu_ctl_fifo_flush(struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_temp  (struct mpu_dev *dev);
 static int mpu_ctl_fifo_enable_accel (struct mpu_dev *dev);
 static int mpu_ctl_fifo_enable_gyro  (struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_temp (struct mpu_dev *dev);
 static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev);
 static int mpu_ctl_fifo_disable_gyro (struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_temp (struct mpu_dev *dev);
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
 static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
 static int mpu_ctl_fifo_data(struct mpu_dev *dev);
 static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
 static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
-static int mpu_ctl_temperature(struct mpu_dev *dev, bool temp_on);
 
 /* level 2 - internal structure management */
 static int mpu_dev_bind(const char *path,
@@ -173,7 +174,6 @@ static int mpu_cfg_reset(struct mpu_dev *dev);
 static int mpu_dat_reset(struct mpu_dev *dev);
 static int mpu_cal_reset(struct mpu_dev *dev);
 
-static int mpu_cfg_recover(struct mpu_dev *dev) __attribute__((unused));
 static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev);
 static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev);
 
@@ -285,31 +285,6 @@ mpu_init_error:
 	return -1;
 }
 
-
-static int mpu_cfg_recover (struct mpu_dev *dev)
-{
-	if ((NULL == dev) || (NULL == dev->cfg))
-		return -1;
-
-	memcpy((void *)dev->cfg, (void *)&mpu6050_defcfg, sizeof(struct mpu_cfg));
-
-	unsigned int i = 1;
-	unsigned int len = sizeof(dev->cfg->cfg)/sizeof(dev->cfg->cfg[0]);
-
-	for (i = 0; i < len; i++) {
-
-		if (0 == dev->cfg->cfg[i][0]) /* invalid register */
-			continue;
-
-		if (mpu_read_byte(dev, dev->cfg->cfg[i][0], &dev->cfg->cfg[i][1]) < 0) /* read error */
-			return -1;
-
-	}
-
-	return 0;
-}
-
-
 int mpu_destroy(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
@@ -327,7 +302,7 @@ int mpu_destroy(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_wake(struct mpu_dev *dev)
+static int mpu_ctl_wake(struct mpu_dev *dev)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
@@ -546,34 +521,34 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 	return 0;
 }
 
-static int __attribute__((unused)) mpu_ctl_temperature(struct mpu_dev *dev, bool temp_on)
-{
-	if ((NULL == dev) || (NULL == dev->bus))
-		return -1;
-
-	mpu_reg_t val;
-	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
-		return -1;
-
-	if (temp_on)
-		val &= ~TEMP_DIS_BIT; /* temperature sensor on */
-	else
-		val |= TEMP_DIS_BIT;    /* temperature sensor off */
-
-
-	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
-		return -1;
-
-	if (mpu_cfg_set(dev) < 0)
-		return -1;
-	if (mpu_dat_set(dev) < 0)
-		return -1;
-	if (mpu_ctl_fifo_flush(dev) < 0)
-	       return -1;
-
-	return 0;
-}
-
+//static int __attribute__((unused)) mpu_ctl_temperature(struct mpu_dev *dev, bool temp_on)
+//{
+//	if ((NULL == dev) || (NULL == dev->bus))
+//		return -1;
+//
+//	mpu_reg_t val;
+//	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
+//		return -1;
+//
+//	if (temp_on)
+//		val &= ~TEMP_DIS_BIT; /* temperature sensor on */
+//	else
+//		val |= TEMP_DIS_BIT;    /* temperature sensor off */
+//
+//
+//	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
+//		return -1;
+//
+//	if (mpu_cfg_set(dev) < 0)
+//		return -1;
+//	if (mpu_dat_set(dev) < 0)
+//		return -1;
+//	if (mpu_ctl_fifo_flush(dev) < 0)
+//	       return -1;
+//
+//	return 0;
+//}
+//
 int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
@@ -1039,7 +1014,7 @@ static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_dat_set(struct mpu_dev *dev)
+static int mpu_dat_set(struct mpu_dev *dev)
 {
 	if ((NULL == dev) || (NULL == dev->dat) || (NULL == dev->cal))
 		return -1;
@@ -1167,7 +1142,7 @@ int mpu_dat_set(struct mpu_dev *dev)
 }
 
 
-int mpu_dat_reset(struct mpu_dev *dev)
+static int mpu_dat_reset(struct mpu_dev *dev)
 {
 	if (NULL == dev)
 		return -1;
@@ -1266,7 +1241,7 @@ static int mpu_cfg_parse(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_cal_reset(struct mpu_dev *dev)
+static int mpu_cal_reset(struct mpu_dev *dev)
 {
 	if ((NULL == dev) || (NULL == dev->cal))
 		return -1;
@@ -1433,7 +1408,7 @@ static int mpu_ctl_fifo_data(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_count(struct mpu_dev *dev)
+static int mpu_ctl_fifo_count(struct mpu_dev *dev)
 {
 	if (MPUDEV_IS_NULL(dev))
 		return -1;
@@ -1448,7 +1423,7 @@ int mpu_ctl_fifo_count(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_flush(struct mpu_dev *dev)
+static int mpu_ctl_fifo_flush(struct mpu_dev *dev)
 {
 	if (MPUDEV_IS_NULL(dev))
 		return -1;
@@ -1482,7 +1457,7 @@ static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
 	return 0;
 }
 
-int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_t *val)
+static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_t *val)
 {
 	uint16_t dh;  /* unsigned for bit fiddling data high */
 	uint16_t dl;  /* unsigned for bit fiddling data low  */
@@ -1659,7 +1634,7 @@ static int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1675,7 +1650,7 @@ int mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_enable(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_fifo_enable(struct mpu_dev *dev)
 {
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1692,7 +1667,7 @@ int mpu_ctl_fifo_enable(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_enable_accel(struct mpu_dev *dev)
+static int mpu_ctl_fifo_enable_accel(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1709,7 +1684,7 @@ int mpu_ctl_fifo_enable_accel(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_enable_gyro(struct mpu_dev *dev)
+static int mpu_ctl_fifo_enable_gyro(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1726,7 +1701,7 @@ int mpu_ctl_fifo_enable_gyro(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_enable_temp(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_fifo_enable_temp(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1743,7 +1718,7 @@ int mpu_ctl_fifo_enable_temp(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_disable(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_fifo_disable(struct mpu_dev *dev)
 {
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
@@ -1761,7 +1736,7 @@ int mpu_ctl_fifo_disable(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev)
+static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1778,7 +1753,7 @@ int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_disable_gyro(struct mpu_dev *dev)
+static int mpu_ctl_fifo_disable_gyro(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1795,7 +1770,7 @@ int mpu_ctl_fifo_disable_gyro(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_fifo_disable_temp(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_ctl_fifo_disable_temp(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
@@ -1903,7 +1878,7 @@ static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_ctl_selftest_disable_gyro(struct mpu_dev *dev)
+static int mpu_ctl_selftest_disable_gyro(struct mpu_dev *dev)
 {
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
@@ -1943,7 +1918,6 @@ int mpu_ctl_reset(struct mpu_dev *dev)
 
 	return 0;
 }
-
 
 static int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 {
@@ -2168,7 +2142,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	return 0;
 }
 
-
 static inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
 {
 	if (dev->cfg->accel_fifo_en) {
@@ -2177,7 +2150,6 @@ static inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
 		*(dev->Az) *= -1;
 	}
 }
-
 
 static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev)
 {
@@ -2204,7 +2176,7 @@ static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_diagnose(struct mpu_dev *dev)
+static int __attribute__((unused)) mpu_diagnose(struct mpu_dev *dev)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
