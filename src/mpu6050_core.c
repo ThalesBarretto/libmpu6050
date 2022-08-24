@@ -439,7 +439,7 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 	
 	/* break circular dependencies */
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
-	if( rate_hz == old_rate_hz ) {
+	if( rate_hz == old_rate_hz) {
 		return 9;
 	}
 
@@ -1275,23 +1275,23 @@ static int mpu_cfg_parse(struct mpu_dev *dev)
 	if ((NULL == dev) || (NULL == dev->cfg))
 		return -1;
 
-	if (mpu_cfg_parse_PWR_MGMT(dev) < 0 )
+	if (mpu_cfg_parse_PWR_MGMT(dev) < 0)
 	        return -1;
-	if (mpu_cfg_parse_FIFO_EN(dev) < 0 )
+	if (mpu_cfg_parse_FIFO_EN(dev) < 0)
 	        return -1;
-	if (mpu_cfg_parse_ACCEL_CONFIG(dev) < 0 )
+	if (mpu_cfg_parse_ACCEL_CONFIG(dev) < 0)
 	        return -1;
-	if (mpu_cfg_parse_GYRO_CONFIG(dev) < 0 )
+	if (mpu_cfg_parse_GYRO_CONFIG(dev) < 0)
 	        return -1;
-	if (mpu_cfg_parse_CONFIG(dev) < 0 )
+	if (mpu_cfg_parse_CONFIG(dev) < 0)
 	        return -1;
 	if (mpu_cfg_parse_SMPLRT_DIV(dev) < 0)
 	       return -1;
 	if (mpu_cfg_parse_USER_CTRL(dev) < 0)
 	       return -1;
-	if (mpu_cfg_parse_INT_PIN_CFG(dev) < 0 )
+	if (mpu_cfg_parse_INT_PIN_CFG(dev) < 0)
 	        return -1;
-	if (mpu_cfg_parse_INT_ENABLE(dev) < 0 )
+	if (mpu_cfg_parse_INT_ENABLE(dev) < 0)
 	         return -1;
 
 	return 0;
@@ -1452,7 +1452,7 @@ static int mpu_ctl_fifo_data(struct mpu_dev *dev)
 		*(dev->Az2) = (mpu_data_t)*(dev->Az) * *(dev->Az);
 		*(dev->AM) = (mpu_data_t)sqrt(*(dev->Ax2) + *(dev->Ay2) + *(dev->Az2));
 	}
-	if (dev->cfg->xg_fifo_en && dev->cfg->yg_fifo_en && dev->cfg->zg_fifo_en ) {
+	if (dev->cfg->xg_fifo_en && dev->cfg->yg_fifo_en && dev->cfg->zg_fifo_en) {
 		*(dev->Gx) -= (mpu_data_t)dev->cal->xg_bias;
 		*(dev->Gy) -= (mpu_data_t)dev->cal->yg_bias;
 		*(dev->Gz) -= (mpu_data_t)dev->cal->zg_bias;
@@ -1668,7 +1668,7 @@ static int __attribute__((unused)) mpu_ctl_fifo_reset(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
 
-	if (mpu_write_byte(dev, USER_CTRL, val | FIFO_RESET_BIT ) < 0)
+	if (mpu_write_byte(dev, USER_CTRL, val | FIFO_RESET_BIT) < 0)
 		return -1;
 
 	sleep(1);
@@ -1684,7 +1684,7 @@ static int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
 
-	if (mpu_write_byte(dev, USER_CTRL, val | I2C_MST_RESET_BIT ) < 0)
+	if (mpu_write_byte(dev, USER_CTRL, val | I2C_MST_RESET_BIT) < 0)
 		return -1;
 
 	sleep(1);
@@ -1700,7 +1700,7 @@ int mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
 
-	if (mpu_write_byte(dev, USER_CTRL, val | SIG_COND_RESET_BIT ) < 0)
+	if (mpu_write_byte(dev, USER_CTRL, val | SIG_COND_RESET_BIT) < 0)
 		return -1;
 
 	sleep(1);
@@ -1715,7 +1715,7 @@ int mpu_ctl_fifo_enable(struct mpu_dev *dev)
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
-	if (mpu_cfg_set_val(dev, USER_CTRL, val | FIFO_EN_BIT ) < 0)
+	if (mpu_cfg_set_val(dev, USER_CTRL, val | FIFO_EN_BIT) < 0)
 		return -1;
 	if (mpu_cfg_set(dev) < 0)
 		return -1;
@@ -1783,7 +1783,7 @@ int mpu_ctl_fifo_disable(struct mpu_dev *dev)
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
-	if (mpu_cfg_set_val(dev, USER_CTRL, val & (~FIFO_EN_BIT) ) < 0)
+	if (mpu_cfg_set_val(dev, USER_CTRL, val & (~FIFO_EN_BIT)) < 0)
 		return -1;
 	if (mpu_cfg_set(dev) < 0)
 		return -1;
@@ -1852,7 +1852,7 @@ static int __attribute__((unused)) mpu_ctl_selftest_fifo_disable(struct mpu_dev 
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
-	if (mpu_cfg_set_val(dev, USER_CTRL, val & (~FIFO_EN_BIT) ) < 0)
+	if (mpu_cfg_set_val(dev, USER_CTRL, val & (~FIFO_EN_BIT)) < 0)
 		return -1;
 	if (mpu_cfg_set(dev) < 0)
 		return -1;
@@ -1961,7 +1961,7 @@ int mpu_ctl_selftest_disable_gyro(struct mpu_dev *dev)
 
 int mpu_ctl_reset(struct mpu_dev *dev)
 {
-	if (mpu_write_byte(dev, PWR_MGMT_1,DEVICE_RESET_BIT ) < 0)
+	if (mpu_write_byte(dev, PWR_MGMT_1,DEVICE_RESET_BIT) < 0)
 		return -1;
 
 	sleep(1);
@@ -2261,33 +2261,33 @@ int mpu_diagnose(struct mpu_dev *dev)
 	printf("%-20s %6.0lf %s\n","Gyro bandwidth"	, dev->gbdw		,"(Hz)");
 	printf("%-20s %6.0lf %s\n","Gyro delay"		, dev->gdly		,"(ms)");
 	printf("----------------------------------------\n");
-	printf("%-20s %d\n","SLEEP BIT"		, dev->cfg->sleep );
-	printf("%-20s %d\n","CYCLE BIT"		, dev->cfg->cycle );
-	printf("%-20s %d\n","TEMP_DIS BIT"	, dev->cfg->temp_dis );
-	printf("%-20s %d\n","STDBY_XA BIT"	, dev->cfg->stdby_xa );
-	printf("%-20s %d\n","STDBY_YA BIT"	, dev->cfg->stdby_ya );
-	printf("%-20s %d\n","STDBY_ZA BIT"	, dev->cfg->stdby_za );
-	printf("%-20s %d\n","STDBY_XG BIT"	, dev->cfg->stdby_xg );
-	printf("%-20s %d\n","STDBY_YG BIT"	, dev->cfg->stdby_yg );
-	printf("%-20s %d\n","STDBY_ZG BIT"	, dev->cfg->stdby_zg );
-	printf("%-20s %d\n","I2C_MST_EN BIT"	, dev->cfg->i2c_mst_en );
-	printf("%-20s %d\n","I2C_IF_DIS BIT"	, dev->cfg->i2c_if_dis );
-	printf("%-20s %d\n","FIFO_EN BIT"	, dev->cfg->fifo_en );
-	printf("%-20s %d\n","TEMP_FIFO_EN BIT"	, dev->cfg->temp_fifo_en );
-	printf("%-20s %d\n","FIFO Accel BIT"	, dev->cfg->accel_fifo_en );
-	printf("%-20s %d\n","FIFO Gyro X BIT"	, dev->cfg->xg_fifo_en );
-	printf("%-20s %d\n","FIFO Gyro Y BIT"	, dev->cfg->yg_fifo_en );
-	printf("%-20s %d\n","FIFO Gyro Z BIT"	, dev->cfg->zg_fifo_en );
-	printf("%-20s %d\n","FIFO SLV0"		, dev->cfg->slv0_fifo_en );
-	printf("%-20s %d\n","FIFO SLV1"		, dev->cfg->slv1_fifo_en );
-	printf("%-20s %d\n","FIFO SLV2"		, dev->cfg->slv2_fifo_en );
-	printf("%-20s %d\n","FIFO SLV3"		, dev->cfg->slv3_fifo_en );
-	printf("%-20s %d\n","FIFO SLV4"		, dev->cfg->slv4_fifo_en );
-	printf("%-20s %d\n","FSYNC_INT_EN BIT"	, dev->cfg->fsync_int_en );
-	printf("%-20s %d\n","FIFO_OFLOW_EN BIT"	, dev->cfg->fifo_oflow_en );
-	printf("%-20s %d\n","I2C_MST_INT_EN BIT", dev->cfg->i2c_mst_int_en );
-	printf("%-20s %d\n","DATA_RDY_EN BIT"	, dev->cfg->data_rdy_en );
-	printf("%-20s %d\n","raw[0]"		, dev->dat->raw[0] );
+	printf("%-20s %d\n","SLEEP BIT"		, dev->cfg->sleep);
+	printf("%-20s %d\n","CYCLE BIT"		, dev->cfg->cycle);
+	printf("%-20s %d\n","TEMP_DIS BIT"	, dev->cfg->temp_dis);
+	printf("%-20s %d\n","STDBY_XA BIT"	, dev->cfg->stdby_xa);
+	printf("%-20s %d\n","STDBY_YA BIT"	, dev->cfg->stdby_ya);
+	printf("%-20s %d\n","STDBY_ZA BIT"	, dev->cfg->stdby_za);
+	printf("%-20s %d\n","STDBY_XG BIT"	, dev->cfg->stdby_xg);
+	printf("%-20s %d\n","STDBY_YG BIT"	, dev->cfg->stdby_yg);
+	printf("%-20s %d\n","STDBY_ZG BIT"	, dev->cfg->stdby_zg);
+	printf("%-20s %d\n","I2C_MST_EN BIT"	, dev->cfg->i2c_mst_en);
+	printf("%-20s %d\n","I2C_IF_DIS BIT"	, dev->cfg->i2c_if_dis);
+	printf("%-20s %d\n","FIFO_EN BIT"	, dev->cfg->fifo_en);
+	printf("%-20s %d\n","TEMP_FIFO_EN BIT"	, dev->cfg->temp_fifo_en);
+	printf("%-20s %d\n","FIFO Accel BIT"	, dev->cfg->accel_fifo_en);
+	printf("%-20s %d\n","FIFO Gyro X BIT"	, dev->cfg->xg_fifo_en);
+	printf("%-20s %d\n","FIFO Gyro Y BIT"	, dev->cfg->yg_fifo_en);
+	printf("%-20s %d\n","FIFO Gyro Z BIT"	, dev->cfg->zg_fifo_en);
+	printf("%-20s %d\n","FIFO SLV0"		, dev->cfg->slv0_fifo_en);
+	printf("%-20s %d\n","FIFO SLV1"		, dev->cfg->slv1_fifo_en);
+	printf("%-20s %d\n","FIFO SLV2"		, dev->cfg->slv2_fifo_en);
+	printf("%-20s %d\n","FIFO SLV3"		, dev->cfg->slv3_fifo_en);
+	printf("%-20s %d\n","FIFO SLV4"		, dev->cfg->slv4_fifo_en);
+	printf("%-20s %d\n","FSYNC_INT_EN BIT"	, dev->cfg->fsync_int_en);
+	printf("%-20s %d\n","FIFO_OFLOW_EN BIT"	, dev->cfg->fifo_oflow_en);
+	printf("%-20s %d\n","I2C_MST_INT_EN BIT", dev->cfg->i2c_mst_int_en);
+	printf("%-20s %d\n","DATA_RDY_EN BIT"	, dev->cfg->data_rdy_en);
+	printf("%-20s %d\n","raw[0]"		, dev->dat->raw[0]);
 	printf("----------------------------------------\n");
 	printf("ADDRESSES:\n");
 	printf("dat[1](%p) Ax=%p\n", (void *)dev->dat->dat[1], (void *)dev->Ax);

@@ -187,7 +187,6 @@ frees the memory and releases the bus.
 Upon *SUCCESS(0)* bus is freed and *dev* memory deallocated.
 
 Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
