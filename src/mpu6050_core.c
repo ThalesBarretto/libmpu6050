@@ -143,19 +143,19 @@ extern int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 /* level 3 - basic controls */
 static int mpu_diagnose(struct mpu_dev *dev);
-static int mpu_ctl_selftest_enable_accel (struct mpu_dev *dev);
-static int mpu_ctl_selftest_enable_gyro  (struct mpu_dev *dev);
+static int mpu_ctl_selftest_enable_accel( struct mpu_dev *dev);
+static int mpu_ctl_selftest_enable_gyro(  struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
-static int mpu_ctl_selftest_disable_gyro (struct mpu_dev *dev);
+static int mpu_ctl_selftest_disable_gyro( struct mpu_dev *dev);
 static int mpu_ctl_wake(struct mpu_dev *dev);
-static int mpu_ctl_fifo_count(struct mpu_dev *dev);
-static int mpu_ctl_fifo_flush(struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_temp  (struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_accel (struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_gyro  (struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_temp (struct mpu_dev *dev);
+static int mpu_ctl_fifo_count(	      struct mpu_dev *dev);
+static int mpu_ctl_fifo_flush(	      struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_temp(  struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_accel( struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_gyro(  struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_temp( struct mpu_dev *dev);
 static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_gyro (struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_gyro( struct mpu_dev *dev);
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
 static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
 static int mpu_ctl_fifo_data(struct mpu_dev *dev);
@@ -163,10 +163,7 @@ static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
 static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
 
 /* level 2 - internal structure management */
-static int mpu_dev_bind(const char *path,
-			const mpu_reg_t address,
-			struct mpu_dev *dev);
-
+static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_dev *dev);
 static int mpu_dev_allocate(struct mpu_dev **dev);
 static int mpu_cfg_set(struct mpu_dev *dev);
 static int mpu_dat_set(struct mpu_dev *dev);
@@ -184,13 +181,8 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev,
 			      mpu_reg_t clksel);
 
 /* level 1 - configuration registers parsing */
-static int mpu_cfg_get_val(struct mpu_dev *dev,
-			   const mpu_reg_t reg,
-			   mpu_reg_t *val);
-
-static int mpu_cfg_set_val(struct mpu_dev *dev,
-			   const mpu_reg_t reg,
-			   const mpu_reg_t val);
+static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *val);
+static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_reg_t val);
 static int mpu_cfg_write(	struct mpu_dev *dev);
 static int mpu_cfg_validate(	struct mpu_dev *dev);
 static int mpu_cfg_parse(	struct mpu_dev *dev);
@@ -211,9 +203,7 @@ static int mpu_read_data( struct mpu_dev * const dev, const mpu_reg_t reg, int16
 static int mpu_write_byte(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_reg_t val);
 static int mpu_write_word(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_word_t val);
 
-int mpu_init(	const char * const restrict path,
-		struct mpu_dev ** mpudev,
-		const int mode)
+int mpu_init(const char * const restrict path, struct mpu_dev ** mpudev, const int mode)
 {
 	if (*mpudev != NULL) /* device not empty */
 		return -1;
@@ -2363,9 +2353,7 @@ int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 	return 0;
 }
 
-static int mpu_read_byte(struct mpu_dev * const dev,
-		const mpu_reg_t reg,
-		mpu_reg_t *val)
+static int mpu_read_byte(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_reg_t *val)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
@@ -2380,9 +2368,7 @@ static int mpu_read_byte(struct mpu_dev * const dev,
 
 }
 
-static int mpu_write_byte(struct mpu_dev * const dev,
-		const mpu_reg_t reg,
-		const mpu_reg_t val)
+static int mpu_write_byte(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_reg_t val)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
@@ -2396,9 +2382,7 @@ static int mpu_write_byte(struct mpu_dev * const dev,
 
 }
 
-static int mpu_read_word(struct mpu_dev * const dev,
-		const mpu_reg_t reg,
-		mpu_word_t *val)
+static int mpu_read_word(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_word_t *val)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
@@ -2413,9 +2397,7 @@ static int mpu_read_word(struct mpu_dev * const dev,
 
 }
 
-static int __attribute__((unused)) mpu_write_word(struct mpu_dev * const dev,
-		const mpu_reg_t reg,
-		const mpu_word_t val)
+static int __attribute__((unused)) mpu_write_word(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_word_t val)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
 		return -1;
