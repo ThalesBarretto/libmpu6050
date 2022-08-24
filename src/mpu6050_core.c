@@ -1948,6 +1948,10 @@ static int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
 {
+	/*
+	 * restoring calibration registers didn't prove useful
+	 * best bet is to use just the biases, or recalibrate
+	 */
 	mpu_ctl_calibration_reset(dev); /* clear OFFS_USRH registers and calibration data */
 	dev->cal->xa_cust = bkp->xa_cust;
 	dev->cal->ya_cust = bkp->ya_cust;
@@ -1965,21 +1969,6 @@ static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *d
 	dev->cal->zg_bias = bkp->zg_bias;
 	dev->cal->AM_bias = bkp->AM_bias;
 	dev->cal->GM_bias = bkp->GM_bias;
-
-	/* restoring calibration registers didn't prove useful */
-	//mpu_write_byte(dev, XA_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->xa_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, XA_OFFS_USRL,(uint8_t)((((uint16_t)dev->cal->xa_cust)    &0xFE) | (dev->cal->xa_orig & 0x1)));
-	//mpu_write_byte(dev, YA_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->ya_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, YA_OFFS_USRL,(uint8_t)((((uint16_t)dev->cal->ya_cust)    &0xFE) | (dev->cal->ya_orig & 0x1)));
-	//mpu_write_byte(dev, ZA_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->za_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, ZA_OFFS_USRL,(uint8_t)((((uint16_t)dev->cal->za_cust)    &0xFE) | (dev->cal->za_orig & 0x1)));
-
-	//mpu_write_byte(dev, XG_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->xg_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, XG_OFFS_USRL,(uint8_t)((uint16_t)dev->cal->xg_cust)&0xFF);
-	//mpu_write_byte(dev, YG_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->yg_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, YG_OFFS_USRL,(uint8_t)((uint16_t)dev->cal->yg_cust)&0xFF);
-	//mpu_write_byte(dev, ZG_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->zg_cust)>>8)&0xFF));
-	//mpu_write_byte(dev, ZG_OFFS_USRL,(uint8_t)((uint16_t)dev->cal->zg_cust)&0xFF);
 
 	mpu_ctl_fifo_flush(dev);
 
