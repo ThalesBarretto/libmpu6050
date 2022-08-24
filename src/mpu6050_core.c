@@ -234,11 +234,9 @@ int mpu_init(const char * const restrict path, struct mpu_dev ** mpudev, const i
 				goto mpu_init_error;
 			if (mpu_cal_reset(dev) < 0) /* assign unity gain, zero errors */
 				goto mpu_init_error;
-
 			if (mpu_cfg_set(dev) < 0) /* assign default config */
 				goto mpu_init_error;
 			break;
-
 		case MPU6050_RESTORE:
 			mpu_dev_parameters_restore(MPU6050_CFGFILE, dev); /* read config from device */
 			/* fill device structure */
@@ -267,7 +265,6 @@ mpu_init_error:
 		if (close(*(dev->bus)) < 0) /* close failed */
 			exit(EXIT_FAILURE);
 	}
-
 
 	if (mpu_destroy(dev) < 0) /* cleanup failed, check for bugs */
 		exit(EXIT_FAILURE);
@@ -362,24 +359,23 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
-	if (dlpf > 7) { /* invalid dlpf_cfg value */
+	if (dlpf > 7) /* invalid dlpf_cfg value */
 		return -1;
-	}
 
 	/* get DLPF_CFG value */
 	mpu_reg_t val;
-	if (mpu_read_byte(dev, CONFIG, &val) < 0) {
+	if (mpu_read_byte(dev, CONFIG, &val) < 0)
 		return -1;
-	}
+
 	/* break circular dependencies */
-	if((val & DLPF_CFG_BIT) == (dlpf & DLPF_CFG_BIT)) {
+	if((val & DLPF_CFG_BIT) == (dlpf & DLPF_CFG_BIT))
 		return 9;
-	}
 
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
 
 	if (mpu_cfg_get_val(dev, CONFIG, &val) < 0)
 		return -1;
+
 	val &= ~DLPF_CFG_BIT;
 	val |= (dlpf & DLPF_CFG_BIT);
 
@@ -409,7 +405,7 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 	/* break circular dependencies */
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
 	if( rate_hz == old_rate_hz) {
-		return 9;
+		return 0;
 	}
 
 	switch (rate_hz) { 		/* base 8kHz  / 1kHz	*/
@@ -427,9 +423,7 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 		return -1;
 
 	unsigned int fs_base = (val & DLPF_CFG_BIT) ? 1000 : 8000;
-
 	unsigned int divider = (fs_base / rate_hz);
-
 	val = (mpu_reg_t) (divider - 1); /* rate_hz = fs_base / (1 + SMPLRT_DIV) */
 
 	if (mpu_cfg_set_val(dev, SMPLRT_DIV, val) < 0)
@@ -574,7 +568,6 @@ static int mpu_cfg_set(struct mpu_dev *dev)
 	if (mpu_cfg_parse(dev) < 0)
 		return -1;
 
-
 	mpu_dev_parameters_save(MPU6050_CFGFILE, dev);
 
 	return 0;
@@ -599,7 +592,6 @@ static int mpu_cfg_write(struct mpu_dev *dev)
 			return -1;
 	}
 
-
 	return 0;
 }
 
@@ -620,11 +612,9 @@ static int mpu_cfg_validate(struct mpu_dev *dev)
 		if (mpu_read_byte(dev, reg, &dev_val) < 0) /* read error */
 			return -1;
 
-
 		if (cfg_val != dev_val) /* value mismatch */
 			return -1;
 	}
-
 
 	return 0;
 }
@@ -718,7 +708,6 @@ static int mpu_cfg_parse_PWR_MGMT(struct mpu_dev *dev)
 		case 3 : wake_freq = 40;  break;
 		}
 	}
-
 	dev->wake_freq	= wake_freq;
 
 	return 0;
@@ -888,7 +877,6 @@ static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 		case 7 :
 			return -1; /* error: reserved value */
 		default :
-
 			return -1; /* error: invalid value */
 	}
 
@@ -898,7 +886,7 @@ static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 static int mpu_cfg_parse_SMPLRT_DIV(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
-				return -1;
+		return -1;
 
 	if (dev->gor == 0) /* must have gyro output rate */
 		return -1;
@@ -941,7 +929,7 @@ static int mpu_cfg_parse_INT_PIN_CFG(struct mpu_dev *dev)
 static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
-			return -1;
+		return -1;
 
 	mpu_reg_t val;
 	if (mpu_cfg_get_val(dev, INT_ENABLE, &val) < 0)
@@ -1095,7 +1083,7 @@ static int mpu_dat_set(struct mpu_dev *dev)
 static int mpu_dat_reset(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
-			return -1;
+		return -1;
 
 	int i;
 	ssize_t len = (sizeof(dev->dat->scl)/sizeof(mpu_data_t));
@@ -1194,7 +1182,7 @@ static int mpu_cfg_parse(struct mpu_dev *dev)
 static int mpu_cal_reset(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
-			return -1;
+		return -1;
 
 	int i = 0;
 	ssize_t len = (sizeof(dev->cal->off)/sizeof(mpu_data_t));
@@ -1203,7 +1191,6 @@ static int mpu_cal_reset(struct mpu_dev *dev)
 		dev->cal->off[i] = 0;
 		dev->cal->dri[i] = 0;
 	}
-	//dev->cal->gra = 0.94;		/* local gravity acceleration in m/s2 */
 	dev->cal->gra = 1;		/* local gravity acceleration in m/s2 */
 	dev->cal->xa_orig = 0;
 	dev->cal->ya_orig = 0;
@@ -1407,8 +1394,8 @@ static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
 	if (mpu_read_byte(dev, FIFO_R_W, &buf) < 0)
 		return -1;
 	dl = (uint16_t)(buf & 0x00FF);
-
 	*data = (uint16_t)(dh | dl);
+
 	return 0;
 }
 
@@ -1427,8 +1414,8 @@ static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_
 	if (mpu_read_byte(dev, reg+1, &buf) < 0)
 		return -1;
 	dl = (uint16_t)(buf & 0x00FF);
-
 	*val = (uint16_t)(dh | dl);
+
 	return 0;
 }
 
