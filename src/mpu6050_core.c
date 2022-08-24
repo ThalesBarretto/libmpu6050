@@ -684,18 +684,18 @@ static int mpu_cfg_parse_PWR_MGMT(struct mpu_dev *dev)
 	if (val1 & DEVICE_RESET_BIT) /* must not be set */
 		return -1;
 
-	if (val1 & SLEEP_BIT)	 { dev->cfg->sleep = true;    }
-	if (val1 & CYCLE_BIT)	 { dev->cfg->cycle = true;    }
-	if (val1 & TEMP_DIS_BIT) { dev->cfg->temp_dis = true; }
-	if (val2 & STDBY_XA_BIT) { dev->cfg->stdby_xa = true; }
-	if (val2 & STDBY_YA_BIT) { dev->cfg->stdby_ya = true; }
-	if (val2 & STDBY_ZA_BIT) { dev->cfg->stdby_za = true; }
-	if (val2 & STDBY_XG_BIT) { dev->cfg->stdby_xg = true; }
-	if (val2 & STDBY_YG_BIT) { dev->cfg->stdby_yg = true; }
-	if (val2 & STDBY_ZG_BIT) { dev->cfg->stdby_zg = true; }
+	dev->cfg->sleep    = (val1 & SLEEP_BIT);
+	dev->cfg->cycle    = (val1 & CYCLE_BIT);
+	dev->cfg->temp_dis = (val1 & TEMP_DIS_BIT);
+	dev->cfg->stdby_xa = (val2 & STDBY_XA_BIT);
+	dev->cfg->stdby_ya = (val2 & STDBY_YA_BIT);
+	dev->cfg->stdby_za = (val2 & STDBY_ZA_BIT);
+	dev->cfg->stdby_xg = (val2 & STDBY_XG_BIT);
+	dev->cfg->stdby_yg = (val2 & STDBY_YG_BIT);
+	dev->cfg->stdby_zg = (val2 & STDBY_ZG_BIT);
 
 	double	wake_freq = 0;
-	int lp_wake_ctrl = (val2 & 0xC0u) >> 6;
+	int lp_wake_ctrl = (val2 & LP_WAKE_CTL_BIT) >> 6;
 
 	if (!(dev->cfg->cycle)) {
 		wake_freq = 0;
@@ -724,9 +724,9 @@ static int mpu_cfg_parse_USER_CTRL(struct mpu_dev *dev)
 	if (val & (FIFO_RESET_BIT | I2C_MST_RESET_BIT | SIG_COND_RESET_BIT | I2C_IF_DIS_BIT))
 		return -1;
 
-	dev->cfg->fifo_en	= (val & FIFO_EN_BIT)	 ? true : false;
-	dev->cfg->i2c_mst_en	= (val & I2C_MST_EN_BIT) ? true : false;
-	dev->cfg->i2c_if_dis	= (val & I2C_IF_DIS_BIT) ? true : false;
+	dev->cfg->fifo_en    = (val & FIFO_EN_BIT);
+	dev->cfg->i2c_mst_en = (val & I2C_MST_EN_BIT);
+	dev->cfg->i2c_if_dis = (val & I2C_IF_DIS_BIT);
 
 	return 0;
 }
@@ -740,33 +740,24 @@ static int mpu_cfg_parse_FIFO_EN(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
 
-	bool temp_fifo_en  = false;
-	bool xg_fifo_en    = false;
-	bool yg_fifo_en    = false;
-	bool zg_fifo_en    = false;
-	bool accel_fifo_en = false;
-	bool slv2_fifo_en  = false;
-	bool slv1_fifo_en  = false;
-	bool slv0_fifo_en  = false;
+	dev->cfg->temp_fifo_en  = (val & TEMP_FIFO_EN_BIT);
+	dev->cfg->xg_fifo_en    = (val & XG_FIFO_EN_BIT);
+	dev->cfg->yg_fifo_en    = (val & YG_FIFO_EN_BIT);
+	dev->cfg->zg_fifo_en    = (val & ZG_FIFO_EN_BIT);
+	dev->cfg->accel_fifo_en = (val & ACCEL_FIFO_EN_BIT);
+	dev->cfg->slv2_fifo_en  = (val & SLV2_FIFO_EN_BIT);
+	dev->cfg->slv1_fifo_en  = (val & SLV1_FIFO_EN_BIT);
+	dev->cfg->slv0_fifo_en  = (val & SLV0_FIFO_EN_BIT);
+
 	mpu_word_t words = 0; /* sensors written to fifo at each sampling time */
-
-	if (val & TEMP_FIFO_EN_BIT)	{ temp_fifo_en  = true; words += 1; }
-	if (val & XG_FIFO_EN_BIT)	{ xg_fifo_en    = true; words += 1; }
-	if (val & YG_FIFO_EN_BIT)	{ yg_fifo_en    = true; words += 1; }
-	if (val & ZG_FIFO_EN_BIT)	{ zg_fifo_en    = true; words += 1; }
-	if (val & ACCEL_FIFO_EN_BIT)	{ accel_fifo_en = true; words += 3; }
-	if (val & SLV2_FIFO_EN_BIT)	{ slv2_fifo_en  = true; words += 1; }
-	if (val & SLV1_FIFO_EN_BIT)	{ slv1_fifo_en  = true; words += 1; }
-	if (val & SLV0_FIFO_EN_BIT)	{ slv0_fifo_en  = true; words += 1; }
-
-	dev->cfg->temp_fifo_en  = temp_fifo_en;
-	dev->cfg->xg_fifo_en    = xg_fifo_en;
-	dev->cfg->yg_fifo_en    = yg_fifo_en;
-	dev->cfg->zg_fifo_en    = zg_fifo_en;
-	dev->cfg->accel_fifo_en = accel_fifo_en;
-	dev->cfg->slv2_fifo_en  = slv2_fifo_en;
-	dev->cfg->slv1_fifo_en  = slv1_fifo_en;
-	dev->cfg->slv0_fifo_en  = slv0_fifo_en;
+	if(dev->cfg->temp_fifo_en)	words += 1;
+	if(dev->cfg->xg_fifo_en)	words += 1;
+	if(dev->cfg->yg_fifo_en)	words += 1;
+	if(dev->cfg->zg_fifo_en)	words += 1;
+	if(dev->cfg->accel_fifo_en)	words += 3;
+	if(dev->cfg->slv2_fifo_en)	words += 1;
+	if(dev->cfg->slv1_fifo_en)	words += 1;
+	if(dev->cfg->slv0_fifo_en)	words += 1;
 
 	/* CRUCIAL - raw[0] = buffered sensors  */
 	dev->dat->raw[0] = words;
@@ -785,9 +776,9 @@ static int mpu_cfg_parse_ACCEL_CONFIG(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
 		return -1;
 
-	dev->cfg->xa_st = (val & XA_ST_BIT) ? true : false;
-	dev->cfg->ya_st = (val & YA_ST_BIT) ? true : false;
-	dev->cfg->za_st = (val & ZA_ST_BIT) ? true : false;
+	dev->cfg->xa_st = (val & XA_ST_BIT);
+	dev->cfg->ya_st = (val & YA_ST_BIT);
+	dev->cfg->za_st = (val & ZA_ST_BIT);
 
 	int afs_sel = (val & AFS_SEL_BIT) >> 3;
 	switch (afs_sel) {
@@ -811,9 +802,9 @@ static int mpu_cfg_parse_GYRO_CONFIG(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
 
-	dev->cfg->xg_st = (val & XG_ST_BIT) ? true : false;
-	dev->cfg->yg_st = (val & YG_ST_BIT) ? true : false;
-	dev->cfg->zg_st = (val & ZG_ST_BIT) ? true : false;
+	dev->cfg->xg_st = (val & XG_ST_BIT);
+	dev->cfg->yg_st = (val & YG_ST_BIT);
+	dev->cfg->zg_st = (val & ZG_ST_BIT);
 
 	int fs_sel = (val & FS_SEL_BIT) >> 3;
 	switch (fs_sel) {
@@ -934,19 +925,12 @@ static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 	if (mpu_cfg_get_val(dev, INT_ENABLE, &val) < 0)
 		return -1;
 
-	bool i2c_mst_en	   = false;
-	bool fifo_oflow_en = false;
-	bool data_rdy_en   = false;
-	if (val & FIFO_OFLOW_EN_BIT)	{ fifo_oflow_en = true; }
-	if (val & I2C_MST_INT_EN_BIT)	{ i2c_mst_en = true;	}
-	if (val & DATA_RDY_EN_BIT)	{ data_rdy_en = true;	}
+	dev->cfg->fifo_oflow_en = (val & FIFO_OFLOW_EN_BIT);
+	dev->cfg->i2c_mst_en	= (val & I2C_MST_INT_EN_BIT);
+	dev->cfg->data_rdy_en   = (val & DATA_RDY_EN_BIT);
 
-	if (i2c_mst_en)	/* I2C_MST_EN not supported */
+	if (dev->cfg->i2c_mst_en) /* I2C_MST_EN not supported */
 		return -1;
-
-	dev->cfg->fifo_oflow_en = fifo_oflow_en ;
-	dev->cfg->i2c_mst_en	= i2c_mst_en;
-	dev->cfg->data_rdy_en   = data_rdy_en;
 
 	return 0;
 }
