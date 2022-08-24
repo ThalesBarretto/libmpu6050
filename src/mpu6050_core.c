@@ -20,7 +20,7 @@
 /* stores calibration related values for reference */
 struct mpu_cal {
 	mpu_data_t gra;		/* mean(sqrt(ax2,ay2,az2)[])		*/
-	mpu_data_t off[32];	/* ax - mean(ax[n]),.	..		*/
+	mpu_data_t off[32];	/* ax - mean(ax[n]),.		*/
 	mpu_data_t gai[32];	/* ax[expec_1g]/ax[measured_1g],...	*/
 	mpu_data_t dri[32];	/* delta(mean(ax[n])/delta(time),...	*/
 	int16_t xa_orig;	/* original XA calibration register value */
@@ -61,9 +61,9 @@ struct mpu_dat {
 /* Mirrors configuration register values and their meaning */
 struct mpu_cfg {
 	mpu_reg_t cfg[16][2];	/* configuration register values */
-	/* configuration bits   -> REGISTER location */
-	bool sleep; 		/* PWR_MGMGT_1 */
-	bool cycle; 		/* PWR_MGMGT_1 */
+	/* 32 configurations	 9 REGISTER locations */
+	bool sleep;		/* PWR_MGMGT_1 */
+	bool cycle;		/* PWR_MGMGT_1 */
 	bool temp_dis;		/* PWR_MGMGT_1 */
 	bool xg_st;		/* GYRO_CONFIG */
 	bool yg_st;		/* GYRO_CONFIG */
@@ -71,29 +71,29 @@ struct mpu_cfg {
 	bool xa_st;		/* ACCEL_CONFIG */
 	bool ya_st;		/* ACCEL_CONFIG */
 	bool za_st;		/* ACCEL_CONFIG */
-	bool stdby_xa; 		/* PWR_MGMGT_2 */
-	bool stdby_ya; 		/* PWR_MGMGT_2 */
-	bool stdby_za; 		/* PWR_MGMGT_2 */
-	bool stdby_xg; 		/* PWR_MGMGT_2 */
-	bool stdby_yg; 		/* PWR_MGMGT_2 */
-	bool stdby_zg; 		/* PWR_MGMGT_2 */
+	bool stdby_xa;		/* PWR_MGMGT_2 */
+	bool stdby_ya;		/* PWR_MGMGT_2 */
+	bool stdby_za;		/* PWR_MGMGT_2 */
+	bool stdby_xg;		/* PWR_MGMGT_2 */
+	bool stdby_yg;		/* PWR_MGMGT_2 */
+	bool stdby_zg;		/* PWR_MGMGT_2 */
 	bool fifo_en;		/* USER_CTRL */
-	bool i2c_mst_en; 	/* USER_CTRL */
+	bool i2c_mst_en;	/* USER_CTRL */
 	bool i2c_if_dis;	/* USER_CTRL */
-	bool temp_fifo_en;  	/* FIFO_EN */
-	bool accel_fifo_en; 	/* FIFO_EN */
-	bool xg_fifo_en;  	/* FIFO_EN */
-	bool yg_fifo_en;  	/* FIFO_EN */
-	bool zg_fifo_en;  	/* FIFO_EN */
-	bool slv0_fifo_en;  	/* FIFO_EN */
-	bool slv1_fifo_en;  	/* FIFO_EN */
-	bool slv2_fifo_en;  	/* FIFO_EN */
-	bool slv3_fifo_en;  	/* I2C_MST_CTRL */
-	bool slv4_fifo_en;  	/* I2C_MST_CTRL */
-	bool fsync_int_en;  	/* INT_PIN_CFG	__not_supported__ */
-	bool fifo_oflow_en;  	/* INT_ENABLE */
-	bool i2c_mst_int_en;  	/* INT_ENABLE */
-	bool data_rdy_en;  	/* INT_ENABLE */
+	bool temp_fifo_en;	/* FIFO_EN */
+	bool accel_fifo_en;	/* FIFO_EN */
+	bool xg_fifo_en;	/* FIFO_EN */
+	bool yg_fifo_en;	/* FIFO_EN */
+	bool zg_fifo_en;	/* FIFO_EN */
+	bool slv0_fifo_en;	/* FIFO_EN */
+	bool slv1_fifo_en;	/* FIFO_EN */
+	bool slv2_fifo_en;	/* FIFO_EN */
+	bool slv3_fifo_en;	/* I2C_MST_CTRL */
+	bool slv4_fifo_en;	/* I2C_MST_CTRL */
+	bool fsync_int_en;	/* INT_PIN_CFG	__not_supported__ */
+	bool fifo_oflow_en;	/* INT_ENABLE */
+	bool i2c_mst_int_en;	/* INT_ENABLE */
+	bool data_rdy_en;	/* INT_ENABLE */
 };
 
 #ifndef MPU6050_ADDR
@@ -107,8 +107,8 @@ const struct mpu_cfg mpu6050_defcfg = {
 		{ PWR_MGMT_2,   0x00},	/* no standby, full on			*/
 		{ CONFIG,       0x00},	/* dlpf off				*/
 		{ SMPLRT_DIV,   0x4F},	/* divisor = 80(1+79), rate = 100	*/
-		{ ACCEL_CONFIG, 0x00},	/* +-2g 				*/
-		{ GYRO_CONFIG,  0x00},	/* +-250 deg/s 				*/
+		{ ACCEL_CONFIG, 0x00},	/* +-2g					*/
+		{ GYRO_CONFIG,  0x00},	/* +-250 deg/s				*/
 		{ USER_CTRL,    0x60},	/* fifo enabled, aux i2c master mode	*/
 		{ FIFO_EN,  	0xF8},	/* temp, accel, gyro buffered		*/
 		{ INT_PIN_CFG,  0x00},	/* interrupts disabled			*/
@@ -177,8 +177,7 @@ static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev);
 static int mpu_ctl_calibration_reset(struct mpu_dev *dev);
 static int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp);
 
-static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev,
-			      mpu_reg_t clksel);
+static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel);
 
 /* level 1 - configuration registers parsing */
 static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *val);
@@ -369,7 +368,7 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 
 	/* break circular dependencies */
 	if((val & DLPF_CFG_BIT) == (dlpf & DLPF_CFG_BIT))
-		return 9;
+		return 0;
 
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
 
