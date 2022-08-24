@@ -186,7 +186,8 @@ frees the memory and releases the bus.
 
 Upon *SUCCESS(0)* bus is freed and *dev* memory deallocated.
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -211,7 +212,7 @@ The embedded buffer on the MPU6050 will collect samples at exact sample rate, so
 
 Upon *SUCCESS(0)* new data is available
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 
 `int` *mpu_ctl_calibrate*`(struct mpu_dev *`*dev*`)`
@@ -222,7 +223,7 @@ Performs a simple calibration routing that lasts for about ten seconds. During t
 
 Upon *SUCCESS(0)* device calibration registers and file are updated
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -238,7 +239,7 @@ Performs a devices reset and puts the device into standard configuration. It is 
 
 Upon *SUCCESS(0)* device performed reset and has standard configuration
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -256,7 +257,7 @@ Dumps the device register values to a file. Please refer to the device datasheet
 
 Upon *SUCCESS(0)* dump file has been written
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -275,7 +276,7 @@ Performs a device self test and dumps the results to a file. Please refer to dev
 
 Upon *SUCCESS(0)* device finished self-test and report file has been written
 
-Upon *FAILURE(1)* there was a bus error, you should abort and check.
+Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
 
 
 *EXAMPLE*

@@ -265,7 +265,7 @@ int mpu_init(	const char * const restrict path,
 mpu_init_error:
 	
 	if (dev->bus != NULL) {
-		if ((close(*(dev->bus))) < 0) /* close failed */
+		if (close(*(dev->bus)) < 0) /* close failed */
 			exit(EXIT_FAILURE);
 	}
 
@@ -379,7 +379,6 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 		return -1;
 	
 	val  &= ~CLKSEL_BIT; /* mask CLK_SEL bits */
-	
 	val  |= clksel;	 /* set  CLK_SEL bits */
 
 	if (mpu_write_byte(dev, PWR_MGMT_1, val) < 0)
@@ -399,7 +398,7 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 
 	/* get DLPF_CFG value */
 	mpu_reg_t val;
-	if ((mpu_read_byte(dev, CONFIG, &val)) < 0) {
+	if (mpu_read_byte(dev, CONFIG, &val) < 0) {
 		return -1;
 	}
 	/* break circular dependencies */
@@ -495,8 +494,7 @@ int mpu_ctl_accel_range(struct mpu_dev *dev, unsigned int range)
 	if (mpu_read_byte(dev, reg, &val) < 0)
 		return -1;
 	
-	val &= (~AFS_SEL_BIT);  /* mask bits */
-	
+	val &= ~AFS_SEL_BIT;  /* mask bits */
 	val |= afs_sel; 	/* set bits */
 	
 	if (mpu_cfg_set_val(dev, reg, val) < 0)
@@ -531,7 +529,7 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
 
-	val &= (~FS_SEL_BIT);  /* mask bits */
+	val &= ~FS_SEL_BIT;  /* mask bits */
 	val |= fs_sel; 		/* set bits */
 
 	if (mpu_cfg_set_val(dev, GYRO_CONFIG, val) < 0)
@@ -596,7 +594,7 @@ int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 
-	val  &= (~CLKSEL_BIT); /* mask CLK_SEL bits */
+	val  &= ~CLKSEL_BIT; /* mask CLK_SEL bits */
 	val  |= clksel;	 /* set  CLK_SEL bits */
 
 	
@@ -670,7 +668,7 @@ static int mpu_cfg_write(struct mpu_dev *dev)
 		reg = dev->cfg->cfg[i][0];
 		val = dev->cfg->cfg[i][1];
 		
-		if ((mpu_write_byte(dev, reg, val)) < 0) /* write error */
+		if (mpu_write_byte(dev, reg, val) < 0) /* write error */
 			return -1;
 	}
 	
@@ -1213,7 +1211,7 @@ int mpu_dat_reset(struct mpu_dev *dev)
 		dev->dat->dat[i][0] = 0;
 	}
 
-	/* make everything point to null */
+	/* ensure everything points to null */
 	dev->AM  = NULL;
 	dev->GM  = NULL;
 	dev->Ax  = NULL;
@@ -2029,6 +2027,7 @@ static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *d
 	dev->cal->AM_bias = bkp->AM_bias;
 	dev->cal->GM_bias = bkp->GM_bias;
 
+	/* restoring calibration registers didn't prove useful */
 	//mpu_write_byte(dev, XA_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->xa_cust)>>8)&0xFF));
 	//mpu_write_byte(dev, XA_OFFS_USRL,(uint8_t)((((uint16_t)dev->cal->xa_cust)    &0xFE) | (dev->cal->xa_orig & 0x1)));
 	//mpu_write_byte(dev, YA_OFFS_USRH,(uint8_t)((((uint16_t)dev->cal->ya_cust)>>8)&0xFF));
