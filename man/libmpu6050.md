@@ -168,7 +168,7 @@ handles device initialization.
 
 Upon *SUCCESS(0)* device is ready and \*dev holds the device data
 
-Upon *FAILURE(1)* the \*\*dev contents are not modified.
+Upon *FAILURES(-1)* the \*\*dev contents are not modified.
 
 *EXAMPLE*
 ```
@@ -186,7 +186,7 @@ frees the memory and releases the bus.
 
 Upon *SUCCESS(0)* bus is freed and *dev* memory deallocated.
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -211,7 +211,7 @@ The embedded buffer on the MPU6050 will collect samples at exact sample rate, so
 
 Upon *SUCCESS(0)* new data is available
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 
 `int` *mpu_ctl_calibrate*`(struct mpu_dev *`*dev*`)`
@@ -222,7 +222,7 @@ Performs a simple calibration routing that lasts for about ten seconds. During t
 
 Upon *SUCCESS(0)* device calibration registers and file are updated
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -238,7 +238,7 @@ Performs a devices reset and puts the device into standard configuration. It is 
 
 Upon *SUCCESS(0)* device performed reset and has standard configuration
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -256,7 +256,7 @@ Dumps the device register values to a file. Please refer to the device datasheet
 
 Upon *SUCCESS(0)* dump file has been written
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 *EXAMPLE*
 ```
@@ -275,7 +275,7 @@ Performs a device self test and dumps the results to a file. Please refer to dev
 
 Upon *SUCCESS(0)* device finished self-test and report file has been written
 
-Upon *FAILURE(1)* wrong argument values or bus error, you should abort.
+Upon *FAILURES(-1)* wrong argument values or bus error, you should abort.
 
 
 *EXAMPLE*
@@ -294,7 +294,7 @@ Selects the desired data sampling rate in samples per second, or Hertz. Supporte
 
 Upon *SUCCESS(0)* device samplig rate setting is updated.
 
-Upon *FAILURE(1)* invalid setting or  bus error.
+Upon *FAILURES(-1)* invalid setting or  bus error.
 
 *EXAMPLE*
 ```
@@ -311,7 +311,7 @@ Changes the DLPF setting value that changes the embedded Digital Low Pass Filter
 
 Upon *SUCCESS(0)* device DLPF setings are updated
 
-Upon *FAILURE(1)* invalid setting or  bus error.
+Upon *FAILURES(-1)* invalid setting or  bus error.
 
 
 *EXAMPLE*
@@ -328,7 +328,7 @@ Sets the Accelerometer range and sensitivity, with values 2, 4, 8 and 16 meaning
 
 Upon *SUCCESS(0)* device acceleromter range seetings are updated
 
-Upon *FAILURE(1)* invalid setting or  bus error.
+Upon *FAILURES(-1)* invalid setting or  bus error.
 
 *EXAMPLE*
 ```
@@ -343,7 +343,7 @@ Sets the Gyroscope range and sensitivity, with values 250, 500, 1000 and 2000 me
 
 Upon *SUCCESS(0)* device gyroscope range settings are updated
 
-Upon *FAILURE(1)* invalid setting or  bus error.
+Upon *FAILURES(-1)* invalid setting or  bus error.
 
 *EXAMPLE*
 ```
@@ -360,7 +360,7 @@ Sets the internal clock source register values [0-3] to use the appropriate devi
 
 Upon *SUCCESS(0)* device clocksource setting has desired configuration
 
-Upon *FAILURE(1)* invalid setting or  bus error.
+Upon *FAILURES(-1)* invalid setting or  bus error.
 
 *EXAMPLE*
 ```
