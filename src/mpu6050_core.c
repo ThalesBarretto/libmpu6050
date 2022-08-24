@@ -521,34 +521,6 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 	return 0;
 }
 
-//static int __attribute__((unused)) mpu_ctl_temperature(struct mpu_dev *dev, bool temp_on)
-//{
-//	if ((NULL == dev) || (NULL == dev->bus))
-//		return -1;
-//
-//	mpu_reg_t val;
-//	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
-//		return -1;
-//
-//	if (temp_on)
-//		val &= ~TEMP_DIS_BIT; /* temperature sensor on */
-//	else
-//		val |= TEMP_DIS_BIT;    /* temperature sensor off */
-//
-//
-//	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
-//		return -1;
-//
-//	if (mpu_cfg_set(dev) < 0)
-//		return -1;
-//	if (mpu_dat_set(dev) < 0)
-//		return -1;
-//	if (mpu_ctl_fifo_flush(dev) < 0)
-//	       return -1;
-//
-//	return 0;
-//}
-//
 int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 {
 	if ((NULL == dev) || (NULL == dev->bus))
