@@ -294,7 +294,7 @@ int mpu_destroy(struct mpu_dev *dev)
 
 static int mpu_ctl_wake(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -325,7 +325,7 @@ static int mpu_ctl_wake(struct mpu_dev *dev)
 
 static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	if (clksel > 7) /* out of range  */
@@ -359,8 +359,9 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 
 int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
+
 	if (dlpf > 7) { /* invalid dlpf_cfg value */
 		return -1;
 	}
@@ -402,7 +403,7 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 
 int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	/* break circular dependencies */
@@ -443,7 +444,7 @@ int mpu_ctl_samplerate(struct mpu_dev *dev, unsigned int rate_hz)
 
 int mpu_ctl_accel_range(struct mpu_dev *dev, unsigned int range)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t afs_sel = 0;
@@ -479,7 +480,7 @@ int mpu_ctl_accel_range(struct mpu_dev *dev, unsigned int range)
 
 int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t fs_sel = 0;
@@ -513,7 +514,7 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 
 int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	switch(clksel) {
@@ -545,7 +546,7 @@ int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 
 static int mpu_cfg_reset(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	memcpy((void *)dev->cfg, (void *)&mpu6050_defcfg, sizeof(struct mpu_cfg));
@@ -558,7 +559,7 @@ static int mpu_cfg_reset(struct mpu_dev *dev)
 
 static int mpu_cfg_set(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	/* write config to device registers */
@@ -581,7 +582,7 @@ static int mpu_cfg_set(struct mpu_dev *dev)
 
 static int mpu_cfg_write(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t reg; /* device register address */
@@ -604,7 +605,7 @@ static int mpu_cfg_write(struct mpu_dev *dev)
 
 static int mpu_cfg_validate(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t dev_val; /* device register value */
@@ -630,7 +631,7 @@ static int mpu_cfg_validate(struct mpu_dev *dev)
 
 static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *val)
 {
-	if ((NULL == dev) || (NULL == dev->cfg) || (val == NULL))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	if (reg == 0) /* register 0 invalid */
@@ -655,7 +656,7 @@ static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *
 
 static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_reg_t val)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	if (reg == 0) /* register 0 invalid */
@@ -679,7 +680,7 @@ static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_r
 
 static int mpu_cfg_parse_PWR_MGMT(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val1;
@@ -725,7 +726,7 @@ static int mpu_cfg_parse_PWR_MGMT(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_USER_CTRL(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -757,7 +758,7 @@ static int mpu_cfg_parse_USER_CTRL(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_FIFO_EN(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -802,7 +803,7 @@ static int mpu_cfg_parse_FIFO_EN(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_ACCEL_CONFIG(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -828,7 +829,7 @@ static int mpu_cfg_parse_ACCEL_CONFIG(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_GYRO_CONFIG(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -855,7 +856,7 @@ static int mpu_cfg_parse_GYRO_CONFIG(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -909,8 +910,8 @@ static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_SMPLRT_DIV(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
-		return -1;
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+				return -1;
 
 	if (dev->gor == 0) /* must have gyro output rate */
 		return -1;
@@ -935,7 +936,7 @@ static int mpu_cfg_parse_SMPLRT_DIV(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_INT_PIN_CFG(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	mpu_reg_t val;
@@ -952,8 +953,8 @@ static int mpu_cfg_parse_INT_PIN_CFG(struct mpu_dev *dev)
 
 static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
-		return -1;
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+			return -1;
 
 	mpu_reg_t val;
 	if (mpu_cfg_get_val(dev, INT_ENABLE, &val) < 0)
@@ -978,8 +979,8 @@ static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 
 static int mpu_dat_set(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->dat) || (NULL == dev->cal))
-		return -1;
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+				return -1;
 
 	/* Associate data with meaningful names */
 	int count = 1;
@@ -1106,8 +1107,8 @@ static int mpu_dat_set(struct mpu_dev *dev)
 
 static int mpu_dat_reset(struct mpu_dev *dev)
 {
-	if (NULL == dev)
-		return -1;
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+			return -1;
 
 	int i;
 	ssize_t len = (sizeof(dev->dat->scl)/sizeof(mpu_data_t));
@@ -1178,7 +1179,7 @@ static int mpu_dat_reset(struct mpu_dev *dev)
 
 static int mpu_cfg_parse(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cfg))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	if (mpu_cfg_parse_PWR_MGMT(dev) < 0)
@@ -1205,8 +1206,8 @@ static int mpu_cfg_parse(struct mpu_dev *dev)
 
 static int mpu_cal_reset(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->cal))
-		return -1;
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+			return -1;
 
 	int i = 0;
 	ssize_t len = (sizeof(dev->cal->off)/sizeof(mpu_data_t));
@@ -1242,7 +1243,7 @@ static int mpu_cal_reset(struct mpu_dev *dev)
 
 static int mpu_dev_allocate(struct mpu_dev **dev)
 {
-	if (*dev != NULL) /* dev not empty */
+	if(MPUDEV_NOT_NULL(*dev)) /* already initialized object */
 		return -1;
 
 	if ((*dev = (struct mpu_dev *)calloc(1, sizeof(struct mpu_dev))) == NULL)
@@ -1274,7 +1275,7 @@ exit_dev:	free(*dev); dev = NULL;
 
 static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus)) /* invalid pointers */
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	if (address == (mpu_reg_t)0x00) /* invalid address */
@@ -1283,7 +1284,6 @@ static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_de
 	size_t pathlen = strlen(path);
 	if ((path == NULL) || (pathlen < 6)) /* invalid path */
 		return -1;
-
 
 	int fd;
 	if ((fd = open(path, O_RDWR)) < 0) /* open failed */
@@ -1309,6 +1309,9 @@ dev_bind_exit:
 
 int mpu_get_data(struct mpu_dev *dev)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	mpu_ctl_fifo_data(dev);
 	mpu_ctl_fix_axis(dev);
 
@@ -1403,6 +1406,9 @@ static int mpu_ctl_fifo_flush(struct mpu_dev *dev)
 
 static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	/* HIC SUNT DRACONES */
 	uint16_t dh;  /* unsigned for bit fiddling data high */
 	uint16_t dl;  /* unsigned for bit fiddling data low  */
@@ -1421,6 +1427,9 @@ static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
 
 static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_t *val)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	uint16_t dh;  /* unsigned for bit fiddling data high */
 	uint16_t dl;  /* unsigned for bit fiddling data low  */
 	uint8_t buf;
@@ -1438,6 +1447,9 @@ static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_
 
 int mpu_ctl_selftest(struct mpu_dev *dev, char *fname)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	/* prepare the device for self-test */
 	struct mpu_cfg *cfg_old = calloc(1, sizeof(struct mpu_cfg));
 	memcpy((void *)cfg_old,  (void *)dev->cfg, sizeof(struct mpu_cfg));
@@ -1566,6 +1578,9 @@ int mpu_ctl_selftest(struct mpu_dev *dev, char *fname)
 
 static int __attribute__((unused)) mpu_ctl_fifo_reset(struct mpu_dev *dev)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1582,6 +1597,9 @@ static int __attribute__((unused)) mpu_ctl_fifo_reset(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1598,6 +1616,9 @@ static int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 {
+	if (MPUDEV_IS_NULL(dev))
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1614,6 +1635,9 @@ static int __attribute__((unused)) mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_fifo_enable(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1631,6 +1655,9 @@ static int __attribute__((unused)) mpu_ctl_fifo_enable(struct mpu_dev *dev)
 
 static int mpu_ctl_fifo_enable_accel(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1648,6 +1675,9 @@ static int mpu_ctl_fifo_enable_accel(struct mpu_dev *dev)
 
 static int mpu_ctl_fifo_enable_gyro(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1665,6 +1695,9 @@ static int mpu_ctl_fifo_enable_gyro(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_fifo_enable_temp(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1682,6 +1715,9 @@ static int __attribute__((unused)) mpu_ctl_fifo_enable_temp(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_fifo_disable(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1700,6 +1736,9 @@ static int __attribute__((unused)) mpu_ctl_fifo_disable(struct mpu_dev *dev)
 
 static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1717,6 +1756,9 @@ static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev)
 
 static int mpu_ctl_fifo_disable_gyro(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1734,6 +1776,9 @@ static int mpu_ctl_fifo_disable_gyro(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_fifo_disable_temp(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, FIFO_EN, &val) < 0)
 		return -1;
@@ -1751,6 +1796,9 @@ static int __attribute__((unused)) mpu_ctl_fifo_disable_temp(struct mpu_dev *dev
 
 static int __attribute__((unused)) mpu_ctl_selftest_fifo_disable(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val = 0;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
@@ -1779,6 +1827,9 @@ static int __attribute__((unused)) mpu_ctl_selftest_fifo_disable(struct mpu_dev 
 
 static int mpu_ctl_selftest_enable_accel(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+			return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
 		return -1;
@@ -1800,6 +1851,9 @@ static int mpu_ctl_selftest_enable_accel(struct mpu_dev *dev)
 
 static int mpu_ctl_selftest_enable_gyro(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
@@ -1821,6 +1875,9 @@ static int mpu_ctl_selftest_enable_gyro(struct mpu_dev *dev)
 
 static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, ACCEL_CONFIG, &val) < 0)
 		return -1;
@@ -1842,6 +1899,9 @@ static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev)
 
 static int mpu_ctl_selftest_disable_gyro(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	uint8_t val;
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
@@ -1863,6 +1923,9 @@ static int mpu_ctl_selftest_disable_gyro(struct mpu_dev *dev)
 
 int mpu_ctl_reset(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	if (mpu_write_byte(dev, PWR_MGMT_1,DEVICE_RESET_BIT) < 0)
 		return -1;
 
@@ -1883,6 +1946,9 @@ int mpu_ctl_reset(struct mpu_dev *dev)
 
 static int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	mpu_ctl_reset(dev); /* clear the OFFS_USRH registers */
 
 	mpu_read_data(dev, XA_OFFS_USRH, &dev->cal->xa_orig);
@@ -1910,6 +1976,9 @@ static int mpu_ctl_calibration_reset(struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	/*
 	 * restoring calibration registers didn't prove useful
 	 * best bet is to use just the biases, or recalibrate
@@ -1939,6 +2008,9 @@ static int __attribute__((unused)) mpu_ctl_calibration_restore(struct mpu_dev *d
 
 int mpu_ctl_calibrate(struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	/* prepare the device for calibration */
 	struct mpu_cfg *cfg_old = calloc(1, sizeof(struct mpu_cfg));
 	memcpy((void *)cfg_old,  (void *)dev->cfg, sizeof(struct mpu_cfg));
@@ -2104,8 +2176,19 @@ static inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
 
 static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
+	if(NULL == fn) {
+		fprintf(stderr, "%s failed: NULL filename\n", __func__);
+		return -1;
+	}
+
 	FILE *dmp;
-	dmp = fopen(fn, "w+");
+	if ( (dmp = fopen(fn, "w+")) == NULL) {
+		fprintf(stderr, "Unable to open file \"%s\"\n", fn);
+		exit(EXIT_FAILURE);
+	}
 	fwrite(dev->cfg, sizeof(*(dev->cfg)), 1, dmp);
 	fwrite(dev->cal, sizeof(*(dev->cal)), 1, dmp);
 	fclose(dmp);
@@ -2114,6 +2197,14 @@ static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev)
 
 static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
+	if(NULL == fn) {
+		fprintf(stderr, "%s failed: NULL filename\n", __func__);
+		return -1;
+	}
+
 	FILE * fp;
 	if ( (fp = fopen(fn, "r")) == NULL) {
 		fprintf(stderr, "Unable to open file \"%s\"\n", fn);
@@ -2129,7 +2220,7 @@ static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev)
 
 static int __attribute__((unused)) mpu_diagnose(struct mpu_dev *dev)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	printf("%-20s %6d\n"	  ,"File Descriptor"	, *(dev->bus));
@@ -2324,6 +2415,9 @@ char mpu_regnames[ 128 ][ 32 ] = {
 
 int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 {
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
+		return -1;
+
 	if(NULL == fn) {
 		fprintf(stderr, "%s failed: NULL filename\n", __func__);
 		return -1;
@@ -2355,7 +2449,7 @@ int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 
 static int mpu_read_byte(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_reg_t *val)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	__s32 res = i2c_smbus_read_byte_data(*(dev->bus), reg);
@@ -2370,7 +2464,7 @@ static int mpu_read_byte(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_re
 
 static int mpu_write_byte(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_reg_t val)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	__s32 res = i2c_smbus_write_byte_data(*(dev->bus), reg, val);
@@ -2384,7 +2478,7 @@ static int mpu_write_byte(struct mpu_dev * const dev, const mpu_reg_t reg, const
 
 static int mpu_read_word(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_word_t *val)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	__s32 res = i2c_smbus_read_word_data(*(dev->bus), reg);
@@ -2399,7 +2493,7 @@ static int mpu_read_word(struct mpu_dev * const dev, const mpu_reg_t reg, mpu_wo
 
 static int __attribute__((unused)) mpu_write_word(struct mpu_dev * const dev, const mpu_reg_t reg, const mpu_word_t val)
 {
-	if ((NULL == dev) || (NULL == dev->bus))
+	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
 	__s32 res = i2c_smbus_write_word_data(*(dev->bus), reg, val);
