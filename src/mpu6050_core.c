@@ -732,21 +732,8 @@ static int mpu_cfg_parse_USER_CTRL(struct mpu_dev *dev)
 	mpu_reg_t val;
 	if (mpu_cfg_get_val(dev, USER_CTRL, &val) < 0)
 		return -1;
-	if (val & FIFO_RESET_BIT) {
-		//printf("FIFO_RESET_BIT set \n");
-		return -1;
-	}
-	if (val & I2C_MST_RESET_BIT) {
-		//printf("I2C_MST_RESET_BIT set\n");
-		return -1;
 
-	}
-	if (val & SIG_COND_RESET_BIT) {
-		//printf("SIG_COND_RESET_BIT set\n");
-		return -1;
-	}
-
-	if(val & I2C_IF_DIS_BIT) /* this is valid but will disable i2c communication */
+	if (val & (FIFO_RESET_BIT | I2C_MST_RESET_BIT | SIG_COND_RESET_BIT | I2C_IF_DIS_BIT))
 		return -1;
 
 	dev->cfg->fifo_en	= (val & FIFO_EN_BIT)	 ? true : false;
