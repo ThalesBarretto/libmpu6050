@@ -819,7 +819,7 @@ static int mpu_cfg_parse_CONFIG(struct mpu_dev *dev)
 		return -1;
 
 	/* ignore EXT_SYNC_SET to avoid complicating senors readings */
-	if (val & 0x38) { /* EXT_SYNC_SET not supported */
+	if (val & EXT_SYNC_SET_BIT) { /* EXT_SYNC_SET not supported */
 	       return -1;
 	}
 

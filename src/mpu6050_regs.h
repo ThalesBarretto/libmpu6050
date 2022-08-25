@@ -203,6 +203,15 @@
 #define DLPF_CFG_5		(uint8_t)(0x05u) /* CONFIG */
 #define DLPF_CFG_6		(uint8_t)(0x06u) /* CONFIG */
 #define DLPF_CFG_7		(uint8_t)(0x07u) /* CONFIG */
+#define EXT_SYNC_SET_BIT	(uint8_t)(0x38u) /* CONFIG */
+#define EXT_SYNC_SET_0		(uint8_t)(0x00u) /* CONFIG */
+#define EXT_SYNC_SET_1		(uint8_t)(0x08u) /* CONFIG */
+#define EXT_SYNC_SET_2		(uint8_t)(0x10u) /* CONFIG */
+#define EXT_SYNC_SET_3		(uint8_t)(0x18u) /* CONFIG */
+#define EXT_SYNC_SET_4		(uint8_t)(0x20u) /* CONFIG */
+#define EXT_SYNC_SET_5		(uint8_t)(0x28u) /* CONFIG */
+#define EXT_SYNC_SET_6		(uint8_t)(0x30u) /* CONFIG */
+#define EXT_SYNC_SET_7		(uint8_t)(0x38u) /* CONFIG */
 
 #define FS_SEL_BIT		(uint8_t)(0x18u) /* GYRO_CONFIG */
 #define FS_SEL_0		(uint8_t)(0x00u) /* GYRO_CONFIG */
