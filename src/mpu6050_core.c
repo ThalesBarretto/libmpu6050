@@ -360,7 +360,7 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
-	if (dlpf > 7) /* invalid dlpf_cfg value */
+	if (dlpf > 6) /* invalid dlpf_cfg value */
 		return -1;
 
 	/* get device current DLPF_CFG value */
