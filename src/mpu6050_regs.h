@@ -20,124 +20,124 @@
  * 2. Format is in +-1000dps scale (1dps = 32.8 LSB)
  * 3. Bit 0 on the low byte of each axis is reserved and must be unchanged.
  */
-//				  0 0x00
-#define AUX_VDDIO		  1
-//				  2	0x02
-//				  3	0x03
-//				  4	0x04
-//				  5	0x05
-#define XA_OFFS_USRH		  6  // 0x06
-#define XA_OFFS_USRL		  7  // 0x07
-#define YA_OFFS_USRH		  8  // 0x08
-#define YA_OFFS_USRL		  9  // 0x09
-#define ZA_OFFS_USRH		 10  // 0x0A
-#define ZA_OFFS_USRL		 11  // 0x0B
-#define PROD_ID			 12  // 0X0C
-#define SELF_TEST_X		 13
-#define SELF_TEST_Y		 14
-#define SELF_TEST_Z		 15
-#define SELF_TEST_A		 16
-//				 17	0x11
-//				 18	0x12
-#define XG_OFFS_USRH		 19  // 0x13
-#define XG_OFFS_USRL		 20  // 0x14
-#define YG_OFFS_USRH		 21  // 0x15
-#define YG_OFFS_USRL		 22  // 0x16
-#define ZG_OFFS_USRH		 23  // 0x17
-#define ZG_OFFS_USRL		 24  // 0x18
-#define SMPLRT_DIV		 25
-#define CONFIG			 26
-#define GYRO_CONFIG		 27
-#define ACCEL_CONFIG		 28
-#define FF_THR			 29
-#define FF_DUR			 30
-#define MOT_THR			 31
-#define MOT_DUR			 32
-#define ZRMOT_THR		 33
-#define ZRMOT_DUR		 34
-#define FIFO_EN			 35
-#define I2C_MST_CTRL		 36
-#define I2C_SLV0_ADDR		 37
-#define I2C_SLV0_REG		 38
-#define I2C_SLV0_CTRL		 39
-#define I2C_SLV1_ADDR		 40
-#define I2C_SLV1_REG		 41
-#define I2C_SLV1_CTRL		 42
-#define I2C_SLV2_ADDR		 43
-#define I2C_SLV2_REG		 44
-#define I2C_SLV2_CTRL		 45
-#define I2C_SLV3_ADDR		 46
-#define I2C_SLV3_REG		 47
-#define I2C_SLV3_CTRL		 48
-#define I2C_SLV4_ADDR		 49
-#define I2C_SLV4_REG		 50
-#define I2C_SLV4_DO		 51
-#define I2C_SLV4_CTRL		 52
-#define I2C_SLV4_DI		 53
-#define I2C_MAST_STATUS		 54
-#define INT_PIN_CFG		 55
-#define INT_ENABLE		 56
-#define DMP_INT_STATUS		 57
-#define INT_STATUS		 58
-#define ACCEL_XOUT_H		 59
-#define ACCEL_XOUT_L		 60
-#define ACCEL_YOUT_H		 61
-#define ACCEL_YOUT_L		 62
-#define ACCEL_ZOUT_H 		 63
-#define ACCEL_ZOUT_L		 64
-#define TEMP_OUT_H		 65
-#define TEMP_OUT_L		 66
-#define GYRO_XOUT_H		 67
-#define GYRO_XOUT_L		 68
-#define GYRO_YOUT_H		 69
-#define GYRO_YOUT_L		 70
-#define GYRO_ZOUT_H		 71
-#define GYRO_ZOUT_L		 72
-#define EXT_SENS_DATA_00	 73
-#define EXT_SENS_DATA_01	 74
-#define EXT_SENS_DATA_02	 75
-#define EXT_SENS_DATA_03	 76
-#define EXT_SENS_DATA_04	 77
-#define EXT_SENS_DATA_05	 78
-#define EXT_SENS_DATA_06	 79
-#define EXT_SENS_DATA_07	 80
-#define EXT_SENS_DATA_08	 81
-#define EXT_SENS_DATA_09	 82
-#define EXT_SENS_DATA_10	 83
-#define EXT_SENS_DATA_11	 84
-#define EXT_SENS_DATA_12	 85
-#define EXT_SENS_DATA_13	 86
-#define EXT_SENS_DATA_14	 87
-#define EXT_SENS_DATA_15	 88
-#define EXT_SENS_DATA_16	 89
-#define EXT_SENS_DATA_17	 90
-#define EXT_SENS_DATA_18	 91
-#define EXT_SENS_DATA_19	 92
-#define EXT_SENS_DATA_20	 93
-#define EXT_SENS_DATA_21	 94
-#define EXT_SENS_DATA_22	 95
-#define EXT_SENS_DATA_23	 96
-#define MOT_DETECT_STATUS	 97
-//				 98 0x62
-#define I2C_SLV0_DO		 99
-#define I2C_SLV1_DO		100
-#define I2C_SLV2_DO		101
-#define I2C_SLV3_DO		102
-#define I2C_MST_DELAY_CTRL	103
-#define SIGNAL_PATH_RESET	104
-#define MOT_DETECT_CTRL		105
-#define USER_CTRL		106
-#define PWR_MGMT_1		107
-#define PWR_MGMT_2		108
-#define BANK_SEL 		109 // new
-#define MEM_START_ADDR 		110 // new
-#define MEM_R_W			111 // new
-#define PRGM_START_H		112 // new
-#define PRGM_START_L		113 // new
-#define FIFO_COUNT_H		114
-#define FIFO_COUNT_L		115
-#define FIFO_R_W 		116
-#define WHO_AM_I		117
+//				0x00u
+#define AUX_VDDIO		0x01u
+//				0x02u
+//				0x03u
+//				0x04u
+//				0x05u
+#define XA_OFFS_USRH		0x06u
+#define XA_OFFS_USRL		0x07u
+#define YA_OFFS_USRH		0x08u
+#define YA_OFFS_USRL		0x09u
+#define ZA_OFFS_USRH		0x0au
+#define ZA_OFFS_USRL		0x0bu
+#define PROD_ID			0x0cu
+#define SELF_TEST_X		0x0du
+#define SELF_TEST_Y		0x0eu
+#define SELF_TEST_Z		0x0fu
+#define SELF_TEST_A		0x10u
+//				0x11u
+//				0x12u
+#define XG_OFFS_USRH		0x13u
+#define XG_OFFS_USRL		0x14u
+#define YG_OFFS_USRH		0x15u
+#define YG_OFFS_USRL		0x16u
+#define ZG_OFFS_USRH		0x17u
+#define ZG_OFFS_USRL		0x18u
+#define SMPLRT_DIV		0x19u
+#define CONFIG			0x1au
+#define GYRO_CONFIG		0x1bu
+#define ACCEL_CONFIG		0x1cu
+#define FF_THR			0x1du
+#define FF_DUR			0x1eu
+#define MOT_THR			0x1fu
+#define MOT_DUR			0x20u
+#define ZRMOT_THR		0x21u
+#define ZRMOT_DUR		0x22u
+#define FIFO_EN			0x23u
+#define I2C_MST_CTRL		0x24u
+#define I2C_SLV0_ADDR		0x25u
+#define I2C_SLV0_REG		0x26u
+#define I2C_SLV0_CTRL		0x27u
+#define I2C_SLV1_ADDR		0x28u
+#define I2C_SLV1_REG		0x29u
+#define I2C_SLV1_CTRL		0x2au
+#define I2C_SLV2_ADDR		0x2bu
+#define I2C_SLV2_REG		0x2cu
+#define I2C_SLV2_CTRL		0x2du
+#define I2C_SLV3_ADDR		0x2eu
+#define I2C_SLV3_REG		0x2fu
+#define I2C_SLV3_CTRL		0x30u
+#define I2C_SLV4_ADDR		0x31u
+#define I2C_SLV4_REG		0x32u
+#define I2C_SLV4_DO		0x33u
+#define I2C_SLV4_CTRL		0x34u
+#define I2C_SLV4_DI		0x35u
+#define I2C_MAST_STATUS		0x36u
+#define INT_PIN_CFG		0x37u
+#define INT_ENABLE		0x38u
+#define DMP_INT_STATUS		0x39u
+#define INT_STATUS		0x3au
+#define ACCEL_XOUT_H		0x3bu
+#define ACCEL_XOUT_L		0x3cu
+#define ACCEL_YOUT_H		0x3du
+#define ACCEL_YOUT_L		0x3eu
+#define ACCEL_ZOUT_H 		0x3fu
+#define ACCEL_ZOUT_L		0x40u
+#define TEMP_OUT_H		0x41u
+#define TEMP_OUT_L		0x42u
+#define GYRO_XOUT_H		0x43u
+#define GYRO_XOUT_L		0x44u
+#define GYRO_YOUT_H		0x45u
+#define GYRO_YOUT_L		0x46u
+#define GYRO_ZOUT_H		0x47u
+#define GYRO_ZOUT_L		0x48u
+#define EXT_SENS_DATA_00	0x49u
+#define EXT_SENS_DATA_01	0x4au
+#define EXT_SENS_DATA_02	0x4bu
+#define EXT_SENS_DATA_03	0x4cu
+#define EXT_SENS_DATA_04	0x4du
+#define EXT_SENS_DATA_05	0x4eu
+#define EXT_SENS_DATA_06	0x4fu
+#define EXT_SENS_DATA_07	0x50u
+#define EXT_SENS_DATA_08	0x51u
+#define EXT_SENS_DATA_09	0x52u
+#define EXT_SENS_DATA_10	0x53u
+#define EXT_SENS_DATA_11	0x54u
+#define EXT_SENS_DATA_12	0x55u
+#define EXT_SENS_DATA_13	0x56u
+#define EXT_SENS_DATA_14	0x57u
+#define EXT_SENS_DATA_15	0x58u
+#define EXT_SENS_DATA_16	0x59u
+#define EXT_SENS_DATA_17	0x5au
+#define EXT_SENS_DATA_18	0x5bu
+#define EXT_SENS_DATA_19	0x5cu
+#define EXT_SENS_DATA_20	0x5du
+#define EXT_SENS_DATA_21	0x5eu
+#define EXT_SENS_DATA_22	0x5fu
+#define EXT_SENS_DATA_23	0x60u
+#define MOT_DETECT_STATUS	0x61u
+//				0x62u
+#define I2C_SLV0_DO		0x63u
+#define I2C_SLV1_DO		0x64u
+#define I2C_SLV2_DO		0x65u
+#define I2C_SLV3_DO		0x66u
+#define I2C_MST_DELAY_CTRL	0x67u
+#define SIGNAL_PATH_RESET	0x68u
+#define MOT_DETECT_CTRL		0x69u
+#define USER_CTRL		0x6au
+#define PWR_MGMT_1		0x6bu
+#define PWR_MGMT_2		0x6cu
+#define BANK_SEL 		0x6du
+#define MEM_START_ADDR 		0x6eu
+#define MEM_R_W			0x6fu
+#define PRGM_START_H		0x70u
+#define PRGM_START_L		0x71u
+#define FIFO_COUNT_H		0x72u
+#define FIFO_COUNT_L		0x73u
+#define FIFO_R_W 		0x74u
+#define WHO_AM_I		0x75u
 
 /* MPU6050 bit range definitions */
 #define XA_TEST_42_BIT		(uint8_t)(0xE0u) /* SELF_TEST_X */
