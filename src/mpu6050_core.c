@@ -802,7 +802,6 @@ static int mpu_cfg_parse_GYRO_CONFIG(struct mpu_dev *dev)
 		case 2 : dev->gfr = 1000; dev->glbs =  32.8; break;
 		case 3 : dev->gfr = 2000; dev->glbs =  16.4; break;
 		default	:
-
 			return -1; /* invalid value */
 	}
 
@@ -927,11 +926,12 @@ static int mpu_cfg_parse_INT_ENABLE(struct mpu_dev *dev)
 static int mpu_dat_set(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
-				return -1;
+		return -1;
 
 	/* Associate data with meaningful names */
-	int count = 1;
+	int count = 0;
 	if (dev->cfg->accel_fifo_en) {
+		count++;
 		dev->dat->AM = 0;
 		dev->AM  = &dev->dat->AM;
 		dev->dat->scl[count] = 1.0/(double)dev->albs;
@@ -963,9 +963,9 @@ static int mpu_dat_set(struct mpu_dev *dev)
 		dev->Azd = &dev->cal->dri[count];
 		dev->Azm = &dev->dat->mea[count];
 		dev->Azv = &dev->dat->var[count];
-		count++;
 	}
 	if (dev->cfg->temp_fifo_en)	{
+		count++;
 		dev->dat->scl[count] = 1/340.0;
 		dev->dat->dat[count][0] = 0;
 		dev->t  = &dev->dat->dat[count][0];
@@ -974,9 +974,9 @@ static int mpu_dat_set(struct mpu_dev *dev)
 		dev->td = &dev->cal->dri[count];
 		dev->tm = &dev->dat->mea[count];
 		dev->tv = &dev->dat->var[count];
-		count++;
 	}
 	if (dev->cfg->xg_fifo_en)	{
+		count++;
 		dev->dat->GM = 0;
 		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
@@ -988,9 +988,9 @@ static int mpu_dat_set(struct mpu_dev *dev)
 		dev->Gxd = &dev->cal->dri[count];
 		dev->Gxm = &dev->dat->mea[count];
 		dev->Gxv = &dev->dat->var[count];
-		count++;
 	}
 	if (dev->cfg->yg_fifo_en)	{
+		count++;
 		dev->dat->GM = 0;
 		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
@@ -1002,9 +1002,9 @@ static int mpu_dat_set(struct mpu_dev *dev)
 		dev->Gyd = &dev->cal->dri[count];
 		dev->Gym = &dev->dat->mea[count];
 		dev->Gyv = &dev->dat->var[count];
-		count++;
 	}
 	if (dev->cfg->zg_fifo_en)	{
+		count++;
 		dev->dat->GM = 0;
 		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
@@ -1016,36 +1016,36 @@ static int mpu_dat_set(struct mpu_dev *dev)
 		dev->Gzd = &dev->cal->dri[count];
 		dev->Gzm = &dev->dat->mea[count];
 		dev->Gzv = &dev->dat->var[count];
-		count++;
 	}
 	/* don't know if the ordering is correct */
 	if (dev->cfg->slv0_fifo_en) {
+		count++;
 		dev->dat->scl[count] = 1/dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->slv0_dat = &dev->dat->dat[count][0];
-		count++;
 	}
 	if (dev->cfg->slv1_fifo_en) {
+		count++;
 		dev->dat->scl[count] = 1/dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->slv1_dat = &dev->dat->dat[count][0];
-		count++;
 	}
 	if (dev->cfg->slv2_fifo_en) {
+		count++;
 		dev->dat->scl[count] = 1/dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->slv2_dat = &dev->dat->dat[count][0];
-		count++; }
+	}
 	if (dev->cfg->slv3_fifo_en) {
+		count++;
 		dev->dat->scl[count] = 1/dev->albs;
 		dev->slv3_dat = &dev->dat->dat[count][0];
-		count++;
 	}
 	if (dev->cfg->slv4_fifo_en) {
+		count++;
 		dev->dat->scl[count] = 1/dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->slv4_dat = &dev->dat->dat[count][0];
-		count++;
 	}
 
 	return 0;
