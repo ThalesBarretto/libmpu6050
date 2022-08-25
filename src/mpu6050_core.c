@@ -1064,60 +1064,9 @@ static int mpu_dat_reset(struct mpu_dev *dev)
 	}
 
 	/* ensure everything points to null */
-	dev->AM  = NULL;
-	dev->GM  = NULL;
-	dev->Ax  = NULL;
-	dev->Ax2 = NULL;
-	dev->Axo = NULL;
-	dev->Axg = NULL;
-	dev->Axd = NULL;
-	dev->Axm = NULL;
-	dev->Axv = NULL;
-	dev->Ay  = NULL;
-	dev->Ay2 = NULL;
-	dev->Ayo = NULL;
-	dev->Ayg = NULL;
-	dev->Ayd = NULL;
-	dev->Aym = NULL;
-	dev->Ayv = NULL;
-	dev->Az  = NULL;
-	dev->Az2 = NULL;
-	dev->Azo = NULL;
-	dev->Azg = NULL;
-	dev->Azd = NULL;
-	dev->Azm = NULL;
-	dev->Azv = NULL;
-	dev->t	 = NULL;
-	dev->to	 = NULL;
-	dev->tg	 = NULL;
-	dev->td	 = NULL;
-	dev->tm	 = NULL;
-	dev->tv	 = NULL;
-	dev->Gx  = NULL;
-	dev->Gx2 = NULL;
-	dev->Gxo = NULL;
-	dev->Gxg = NULL;
-	dev->Gxd = NULL;
-	dev->Gxm = NULL;
-	dev->Gxv = NULL;
-	dev->Gy  = NULL;
-	dev->Gy2 = NULL;
-	dev->Gyo = NULL;
-	dev->Gyg = NULL;
-	dev->Gyd = NULL;
-	dev->Gym = NULL;
-	dev->Gyv = NULL;
-	dev->Gz  = NULL;
-	dev->Gz2 = NULL;
-	dev->Gzo = NULL;
-	dev->Gzg = NULL;
-	dev->Gzd = NULL;
-	dev->Gzm = NULL;
-	dev->Gzv = NULL;
-	dev->slv0_dat = NULL;
-	dev->slv1_dat = NULL;
-	dev->slv2_dat = NULL;
-	dev->slv3_dat = NULL;
+	for(mpu_data_t **ptr = &(dev->AM); ptr <= &(dev->slv4_dat); ptr++) {
+		*ptr = NULL;
+	}
 
 	return 0;
 }
