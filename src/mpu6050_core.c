@@ -206,11 +206,11 @@ static int mpu_write_word(struct mpu_dev * const dev, const mpu_reg_t reg, const
 
 int mpu_init(const char * const restrict path, struct mpu_dev ** mpudev, const int mode)
 {
-	if (*mpudev != NULL) /* device not empty */
+	if (NULL != *mpudev ) /* device not empty */
 		return -1;
 
 	size_t pathlen = strlen(path);
-	if ((path == NULL) || (pathlen < 6)) /* invalid path */
+	if (NULL == (path ) || (pathlen < 6)) /* invalid path */
 		return -1;
 
 	struct mpu_dev *dev = NULL;
@@ -262,7 +262,7 @@ int mpu_init(const char * const restrict path, struct mpu_dev ** mpudev, const i
 	return 0;
 
 mpu_init_error:
-	if (dev->bus != NULL) {
+	if (NULL != dev->bus ) {
 		if (close(*(dev->bus)) < 0) /* close failed */
 			exit(EXIT_FAILURE);
 	}
@@ -1137,19 +1137,19 @@ static int mpu_dev_allocate(struct mpu_dev **dev)
 	if(MPUDEV_NOT_NULL(*dev)) /* already initialized object */
 		return -1;
 
-	if ((*dev = (struct mpu_dev *)calloc(1, sizeof(struct mpu_dev))) == NULL)
+	if (NULL == (*dev = (struct mpu_dev *)calloc(1, sizeof(struct mpu_dev))))
 		goto exit_dev;
 
-	if (((*dev)->bus = (int *)calloc(1, sizeof(int))) == NULL)
+	if (NULL == ((*dev)->bus = (int *)calloc(1, sizeof(int))))
 		goto exit_dev_bus;
 
-	if (((*dev)->cfg = (struct mpu_cfg *)calloc(1, sizeof(struct mpu_cfg))) == NULL)
+	if (NULL == ((*dev)->cfg = (struct mpu_cfg *)calloc(1, sizeof(struct mpu_cfg))))
 		goto exit_dev_cfg;
 
-	if (((*dev)->cal = (struct mpu_cal *)calloc(1, sizeof(struct mpu_cal))) == NULL)
+	if (NULL == ((*dev)->cal = (struct mpu_cal *)calloc(1, sizeof(struct mpu_cal))))
 		goto exit_dev_cal;
 
-	if (((*dev)->dat = (struct mpu_dat *)calloc(1, sizeof(struct mpu_dat))) == NULL)
+	if (NULL == ((*dev)->dat = (struct mpu_dat *)calloc(1, sizeof(struct mpu_dat))))
 		goto exit_dev_dat;
 
 	return 0;
@@ -1173,7 +1173,7 @@ static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_de
 		return -1;
 
 	size_t pathlen = strlen(path);
-	if ((path == NULL) || (pathlen < 6)) /* invalid path */
+	if (NULL == (path ) || (pathlen < 6)) /* invalid path */
 		return -1;
 
 	int fd;
@@ -1446,7 +1446,7 @@ int mpu_ctl_selftest(struct mpu_dev *dev, char *fname)
 	long double shift_zg = (zg_str - ft_zg)/ft_zg;
 
 	FILE *fp;
-	if ((fp = fopen(fname, "w+")) == NULL) {
+	if (NULL == (fp = fopen(fname, "w+"))) {
 		fprintf(stderr, "Couldn't open \"%s\" for self-test results! - logging to stderr.\n", fname);
 	} else {
 		fprintf(fp, "Self-test results: Xa = %Lf%% shift from factory trim (%4s)\n", fabsl(shift_xa), fabsl(shift_xa) < 14.0L ? "PASS" : "FAIL");
@@ -2079,7 +2079,7 @@ static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev)
 	}
 
 	FILE *dmp;
-	if ( (dmp = fopen(fn, "w+")) == NULL) {
+	if (NULL ==  (dmp = fopen(fn, "w+"))) {
 		fprintf(stderr, "Unable to open file \"%s\"\n", fn);
 		exit(EXIT_FAILURE);
 	}
@@ -2100,7 +2100,7 @@ static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev)
 	}
 
 	FILE * fp;
-	if ( (fp = fopen(fn, "r")) == NULL) {
+	if (NULL ==  (fp = fopen(fn, "r"))) {
 		fprintf(stderr, "Unable to open file \"%s\"\n", fn);
 		exit(EXIT_FAILURE);
 	}
@@ -2318,7 +2318,7 @@ int mpu_ctl_dump(struct mpu_dev *dev, char *fn)
 	}
 
 	FILE *fp;
-	if ( (fp = fopen(fn, "w+")) == NULL) {
+	if (NULL == (fp = fopen(fn, "w+"))) {
 		fprintf(stderr, "%s failed: Unable to open file \"%s\"\n", __func__, fn);
 		return -1;
 	}
