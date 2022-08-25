@@ -100,6 +100,8 @@ struct mpu_cfg {
 #define MPU6050_ADDR 0x68
 #endif
 
+#define ARRAY_LEN(x) sizeof((x))/sizeof((x[0]))
+
 /* The default values for configuration registers */
 const struct mpu_cfg mpu6050_defcfg = {
 	.cfg =	{
@@ -332,7 +334,7 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 		case CLKSEL_1 : dev->clksel = 1; break; /* PLL with X axis gyroscope		*/
 		case CLKSEL_2 : dev->clksel = 2; break; /* PLL with Y axis gyroscope		*/
 		case CLKSEL_3 : dev->clksel = 3; break; /* PLL with Z axis gyroscope		*/
-		case CLKSEL_4 : dev->clksel = 4; break; /* PLL with external 32.768 kHz reference	*/
+		case CLKSEL_4 : dev->clksel = 4; break; /* PLL with external 32.768 kHz reference*/
 		case CLKSEL_5 : dev->clksel = 5; break; /* PLL with external 19.2 MHz reference	*/
 		case CLKSEL_6 : dev->clksel = 6; break; /* RESERVED */
 		case CLKSEL_7 : dev->clksel = 7; break; /* Stops the clock, keeps timing in reset */
@@ -580,10 +582,7 @@ static int mpu_cfg_write(struct mpu_dev *dev)
 	mpu_reg_t reg; /* device register address */
 	mpu_reg_t val; /* device register value */
 
-	unsigned int i = 0;
-	unsigned int len = sizeof(dev->cfg->cfg)/sizeof(dev->cfg->cfg[0]);
-
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
 		reg = dev->cfg->cfg[i][0];
 		val = dev->cfg->cfg[i][1];
 
@@ -601,10 +600,7 @@ static int mpu_cfg_validate(struct mpu_dev *dev)
 
 	mpu_reg_t dev_val; /* device register value */
 
-	unsigned int i = 1;
-	unsigned int len = sizeof(dev->cfg->cfg)/sizeof(dev->cfg->cfg[0]);
-
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
 		mpu_reg_t reg 	  = dev->cfg->cfg[i][0];
 		mpu_reg_t cfg_val = dev->cfg->cfg[i][1];
 
@@ -626,17 +622,13 @@ static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *
 	if (reg == 0) /* register 0 invalid */
 		return -1;
 
-	unsigned int i   = 0;
-	unsigned int len = sizeof(dev->cfg->cfg)/sizeof(dev->cfg->cfg[0]);
-
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
 		if (0 == dev->cfg->cfg[i][0]) 	/* register 0 invalid */
 			continue;
 		if (reg == dev->cfg->cfg[i][0]) {/* seek register */
 			*val = dev->cfg->cfg[i][1];
 			return 0;
 		}
-
 	}
 
 
@@ -651,10 +643,7 @@ static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_r
 	if (reg == 0) /* register 0 invalid */
 		return -1;
 
-	unsigned int i = 0;
-	unsigned int len = sizeof(dev->cfg->cfg)/sizeof(dev->cfg->cfg[0]);
-
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
 		if (0 == dev->cfg->cfg[i][0]) 	/* register 0 invalid */
 			continue;
 
@@ -1068,12 +1057,10 @@ static int mpu_dat_reset(struct mpu_dev *dev)
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
-	int i;
-	ssize_t len = (sizeof(dev->dat->scl)/sizeof(mpu_data_t));
-
-	for(i = 1; i < len; i++) {
-		dev->dat->scl[i] = 1;
-		dev->dat->dat[i][0] = 0;
+	/* start at [1], index [0] should not be changed */
+	for(size_t i = 1; i < ARRAY_LEN(dev->dat->scl); i++) {
+		dev->dat->scl[i] = 1; /* scaling factor of 1 */
+		dev->dat->dat[i][0] = 0; /* all data zeroed */
 	}
 
 	/* ensure everything points to null */
@@ -1167,9 +1154,7 @@ static int mpu_cal_reset(struct mpu_dev *dev)
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
 
-	int i = 0;
-	ssize_t len = (sizeof(dev->cal->off)/sizeof(mpu_data_t));
-	for (i = 0; i < len; i++) {
+	for (size_t i = 0; i < ARRAY_LEN(dev->cal->off); i++) {
 		dev->cal->gai[i] = 1;
 		dev->cal->off[i] = 0;
 		dev->cal->dri[i] = 0;
@@ -1390,12 +1375,15 @@ static int mpu_read_data(struct mpu_dev * const dev, const mpu_reg_t reg, int16_
 	uint16_t dh;  /* unsigned for bit fiddling data high */
 	uint16_t dl;  /* unsigned for bit fiddling data low  */
 	uint8_t buf;
+
 	if (mpu_read_byte(dev, reg, &buf) < 0)
 		return -1;
+
 	dh = (uint16_t)(buf & 0x00FF) << 8;
 
 	if (mpu_read_byte(dev, reg+1, &buf) < 0)
 		return -1;
+
 	dl = (uint16_t)(buf & 0x00FF);
 	*val = (uint16_t)(dh | dl);
 
