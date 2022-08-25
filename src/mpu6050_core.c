@@ -305,7 +305,7 @@ static int mpu_ctl_wake(struct mpu_dev *dev)
 	}
 
 	/* clear DEVICE_RESET, SLEEP and CYCLE bits */
-	val &= (mpu_reg_t) ~(DEVICE_RESET_BIT | SLEEP_BIT | CYCLE_BIT);
+	val &= ~(DEVICE_RESET_BIT | SLEEP_BIT | CYCLE_BIT);
 	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
 		return -1;
 
@@ -346,8 +346,8 @@ static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel)
 	if (mpu_read_byte(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 
-	val  &= ~CLKSEL_BIT; /* mask CLK_SEL bits */
-	val  |= clksel;	 /* set  CLK_SEL bits */
+	val  &= ~CLKSEL_BIT;	/* mask bits */
+	val  |= clksel;		/* set  bits */
 
 	if (mpu_write_byte(dev, PWR_MGMT_1, val) < 0)
 		return -1;
@@ -363,13 +363,13 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 	if (dlpf > 7) /* invalid dlpf_cfg value */
 		return -1;
 
-	/* get DLPF_CFG value */
+	/* get device current DLPF_CFG value */
 	mpu_reg_t val;
 	if (mpu_read_byte(dev, CONFIG, &val) < 0)
 		return -1;
 
 	/* break circular dependencies */
-	if((val & DLPF_CFG_BIT) == (dlpf & DLPF_CFG_BIT))
+	if((val & DLPF_CFG_BIT) == dlpf)
 		return 0;
 
 	unsigned int old_rate_hz = (unsigned int)dev->sr;
@@ -377,8 +377,8 @@ int mpu_ctl_dlpf(struct mpu_dev *dev, unsigned int dlpf)
 	if (mpu_cfg_get_val(dev, CONFIG, &val) < 0)
 		return -1;
 
-	val &= ~DLPF_CFG_BIT;
-	val |= (dlpf & DLPF_CFG_BIT);
+	val &= ~DLPF_CFG_BIT;	/* mask bits */
+	val |= dlpf;		/* set bits */
 
 	if (mpu_cfg_set_val(dev, CONFIG, val) < 0)
 		return -1;
@@ -457,8 +457,8 @@ int mpu_ctl_accel_range(struct mpu_dev *dev, unsigned int range)
 	if (mpu_read_byte(dev, reg, &val) < 0)
 		return -1;
 
-	val &= ~AFS_SEL_BIT;  /* mask bits */
-	val |= afs_sel; 	/* set bits */
+	val &= ~AFS_SEL_BIT;	/* mask bits */
+	val |= afs_sel;		/* set bits */
 
 	if (mpu_cfg_set_val(dev, reg, val) < 0)
 		return -1;
@@ -484,15 +484,16 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 		case  500: fs_sel = FS_SEL_1; break;
 		case 1000: fs_sel = FS_SEL_2; break;
 		case 2000: fs_sel = FS_SEL_3; break;
-		default: return -1;	/* invalid range */
+		default:
+			return -1;	/* invalid range */
 	}
 
 	mpu_reg_t val;
 	if (mpu_cfg_get_val(dev, GYRO_CONFIG, &val) < 0)
 		return -1;
 
-	val &= ~FS_SEL_BIT;  /* mask bits */
-	val |= fs_sel; 		/* set bits */
+	val &= ~FS_SEL_BIT;	/* mask bits */
+	val |= fs_sel;		/* set bits */
 
 	if (mpu_cfg_set_val(dev, GYRO_CONFIG, val) < 0)
 		return -1;
@@ -502,7 +503,7 @@ int mpu_ctl_gyro_range(struct mpu_dev *dev, unsigned int range)
 	if (mpu_dat_set(dev) < 0)
 		return -1;
 	if (mpu_ctl_fifo_flush(dev) < 0)
-	       return -1;
+		return -1;
 
 	return 0;
 }
@@ -525,8 +526,8 @@ int mpu_ctl_clocksource(struct mpu_dev *dev, mpu_reg_t clksel)
 	if (mpu_cfg_get_val(dev, PWR_MGMT_1, &val) < 0)
 		return -1;
 
-	val  &= ~CLKSEL_BIT; /* mask CLK_SEL bits */
-	val  |= clksel;	 /* set  CLK_SEL bits */
+	val  &= ~CLKSEL_BIT;	/* mask bits */
+	val  |= clksel;		/* set  bits */
 
 	if (mpu_cfg_set_val(dev, PWR_MGMT_1, val) < 0)
 		return -1;
@@ -1172,6 +1173,7 @@ static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_de
 	if (address == (mpu_reg_t)0x00) /* invalid address */
 		return -1;
 
+	/* path must contain at least "/dev/i2c" */
 	size_t pathlen = strlen(path);
 	if (NULL == (path ) || (pathlen < 6)) /* invalid path */
 		return -1;
