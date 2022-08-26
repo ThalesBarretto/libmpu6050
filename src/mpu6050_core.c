@@ -144,58 +144,58 @@ extern int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
  */
 
 /* level 3 - basic controls */
-static int mpu_diagnose(struct mpu_dev *dev);
+static int mpu_diagnose(		  struct mpu_dev *dev);
 static int mpu_ctl_selftest_enable_accel( struct mpu_dev *dev);
 static int mpu_ctl_selftest_enable_gyro(  struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_accel(struct mpu_dev *dev);
 static int mpu_ctl_selftest_disable_gyro( struct mpu_dev *dev);
-static int mpu_ctl_wake(struct mpu_dev *dev);
-static int mpu_ctl_fifo_count(	      struct mpu_dev *dev);
-static int mpu_ctl_fifo_flush(	      struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_temp(  struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_accel( struct mpu_dev *dev);
-static int mpu_ctl_fifo_enable_gyro(  struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_temp( struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_accel(struct mpu_dev *dev);
-static int mpu_ctl_fifo_disable_gyro( struct mpu_dev *dev);
-static int mpu_fifo_data(struct mpu_dev *dev, int16_t *data);
-static inline void mpu_ctl_fix_axis(struct mpu_dev *dev);
-static int mpu_ctl_fifo_data(struct mpu_dev *dev);
-static int mpu_ctl_fifo_reset(struct mpu_dev *dev);
-static int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev);
+static int mpu_ctl_wake(		  struct mpu_dev *dev);
+static int mpu_ctl_fifo_count(		  struct mpu_dev *dev);
+static int mpu_ctl_fifo_flush(		  struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_temp(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_accel(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_enable_gyro(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_temp(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_accel(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_disable_gyro(	  struct mpu_dev *dev);
+static int mpu_ctl_fifo_data(		  struct mpu_dev *dev);
+static int mpu_ctl_fifo_reset(		  struct mpu_dev *dev);
+static int mpu_fifo_data(		  struct mpu_dev *dev, int16_t *data);
+static int mpu_ctl_i2c_mst_reset(	  struct mpu_dev *dev);
+static inline void mpu_ctl_fix_axis(	  struct mpu_dev *dev);
 
 /* level 2 - internal structure management */
 static int mpu_dev_bind(const char *path, const mpu_reg_t address, struct mpu_dev *dev);
-static int mpu_dev_allocate(struct mpu_dev **dev);
-static int mpu_cfg_set(struct mpu_dev *dev);
-static int mpu_dat_set(struct mpu_dev *dev);
-static int mpu_cfg_reset(struct mpu_dev *dev);
-static int mpu_dat_reset(struct mpu_dev *dev);
-static int mpu_cal_reset(struct mpu_dev *dev);
+static int mpu_dev_allocate(		  struct mpu_dev **dev);
+static int mpu_cfg_set(			  struct mpu_dev *dev);
+static int mpu_dat_set(			  struct mpu_dev *dev);
+static int mpu_cfg_reset(		  struct mpu_dev *dev);
+static int mpu_dat_reset(		  struct mpu_dev *dev);
+static int mpu_cal_reset(		  struct mpu_dev *dev);
 
-static int mpu_dev_parameters_save(char *fn, struct mpu_dev *dev);
-static int mpu_dev_parameters_restore(char *fn, struct mpu_dev *dev);
+static int mpu_dev_parameters_save(	  char *fn, struct mpu_dev *dev);
+static int mpu_dev_parameters_restore(	  char *fn, struct mpu_dev *dev);
 
-static int mpu_ctl_calibration_reset(struct mpu_dev *dev);
-static int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp);
+static int mpu_ctl_calibration_reset(	  struct mpu_dev *dev);
+static int mpu_ctl_calibration_restore(	  struct mpu_dev *dev, struct mpu_cal *bkp);
 
 static int mpu_cfg_set_CLKSEL(struct mpu_dev *dev, mpu_reg_t clksel);
 
 /* level 1 - configuration registers parsing */
 static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *val);
 static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_reg_t val);
-static int mpu_cfg_write(	struct mpu_dev *dev);
-static int mpu_cfg_validate(	struct mpu_dev *dev);
-static int mpu_cfg_parse(	struct mpu_dev *dev);
-static int mpu_cfg_parse_PWR_MGMT(	struct mpu_dev *dev);
-static int mpu_cfg_parse_CONFIG(	struct mpu_dev *dev);
-static int mpu_cfg_parse_SMPLRT_DIV(	struct mpu_dev *dev);
-static int mpu_cfg_parse_ACCEL_CONFIG(	struct mpu_dev *dev);
-static int mpu_cfg_parse_GYRO_CONFIG(	struct mpu_dev *dev);
-static int mpu_cfg_parse_USER_CTRL(	struct mpu_dev *dev);
-static int mpu_cfg_parse_FIFO_EN(	struct mpu_dev *dev);
-static int mpu_cfg_parse_INT_ENABLE(	struct mpu_dev *dev);
-static int mpu_cfg_parse_INT_PIN_CFG(	struct mpu_dev *dev);
+static int mpu_cfg_write(		  struct mpu_dev *dev);
+static int mpu_cfg_validate(		  struct mpu_dev *dev);
+static int mpu_cfg_parse(		  struct mpu_dev *dev);
+static int mpu_cfg_parse_PWR_MGMT(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_CONFIG(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_SMPLRT_DIV(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_ACCEL_CONFIG(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_GYRO_CONFIG(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_USER_CTRL(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_FIFO_EN(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_INT_ENABLE(	  struct mpu_dev *dev);
+static int mpu_cfg_parse_INT_PIN_CFG(	  struct mpu_dev *dev);
 
 /* level 0  i2c bus communication */
 static int mpu_read_byte( struct mpu_dev * const dev, const mpu_reg_t reg, mpu_reg_t *val);
