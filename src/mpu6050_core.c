@@ -60,7 +60,7 @@ struct mpu_dat {
 
 /* Mirrors configuration register values and their meaning */
 struct mpu_cfg {
-	mpu_reg_t cfg[16][2];	/* configuration register values */
+	mpu_reg_t regs[16][2];	/* configuration register values */
 	/* 32 configurations	 9 REGISTER locations */
 	bool sleep;		/* PWR_MGMGT_1 */
 	bool cycle;		/* PWR_MGMGT_1 */
@@ -104,7 +104,7 @@ struct mpu_cfg {
 
 /* The default values for configuration registers */
 const struct mpu_cfg mpu6050_defcfg = {
-	.cfg =	{
+	.regs =	{
 		{ PWR_MGMT_1,   0x03},	/* power on, temp enabled, clock gyro_z */
 		{ PWR_MGMT_2,   0x00},	/* no standby, full on			*/
 		{ CONFIG,       0x00},	/* dlpf off				*/
@@ -583,9 +583,9 @@ static int mpu_cfg_write(struct mpu_dev *dev)
 	mpu_reg_t reg; /* device register address */
 	mpu_reg_t val; /* device register value */
 
-	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
-		reg = dev->cfg->cfg[i][0];
-		val = dev->cfg->cfg[i][1];
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->regs); i++) {
+		reg = dev->cfg->regs[i][0];
+		val = dev->cfg->regs[i][1];
 
 		if (mpu_write_byte(dev, reg, val) < 0) /* write error */
 			return -1;
@@ -601,9 +601,9 @@ static int mpu_cfg_validate(struct mpu_dev *dev)
 
 	mpu_reg_t dev_val; /* device register value */
 
-	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
-		mpu_reg_t reg 	  = dev->cfg->cfg[i][0];
-		mpu_reg_t cfg_val = dev->cfg->cfg[i][1];
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->regs); i++) {
+		mpu_reg_t reg 	  = dev->cfg->regs[i][0];
+		mpu_reg_t cfg_val = dev->cfg->regs[i][1];
 
 		if (mpu_read_byte(dev, reg, &dev_val) < 0) /* read error */
 			return -1;
@@ -623,11 +623,11 @@ static int mpu_cfg_get_val(struct mpu_dev *dev, const mpu_reg_t reg, mpu_reg_t *
 	if (reg == 0) /* register 0 invalid */
 		return -1;
 
-	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
-		if (0 == dev->cfg->cfg[i][0]) 	/* register 0 invalid */
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->regs); i++) {
+		if (0 == dev->cfg->regs[i][0]) 	/* register 0 means unconfigured */
 			continue;
-		if (reg == dev->cfg->cfg[i][0]) {/* seek register */
-			*val = dev->cfg->cfg[i][1];
+		if (reg == dev->cfg->regs[i][0]) {/* seek register */
+			*val = dev->cfg->regs[i][1];
 			return 0;
 		}
 	}
@@ -644,12 +644,12 @@ static int mpu_cfg_set_val(struct mpu_dev *dev, const mpu_reg_t reg, const mpu_r
 	if (reg == 0) /* register 0 invalid */
 		return -1;
 
-	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->cfg); i++) {
-		if (0 == dev->cfg->cfg[i][0]) 	/* register 0 invalid */
+	for (size_t i = 0; i < ARRAY_LEN(dev->cfg->regs); i++) {
+		if (0 == dev->cfg->regs[i][0]) 	/* register 0 means unconfigured */
 			continue;
 
-		if(reg == dev->cfg->cfg[i][0]) { /* seek register */
-			dev->cfg->cfg[i][1] = val;
+		if(reg == dev->cfg->regs[i][0]) { /* seek register */
+			dev->cfg->regs[i][1] = val;
 			return 0;
 		}
 	}
