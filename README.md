@@ -75,3 +75,9 @@ Contributions are welcome on github, on three channels:
 * Open an [issue](<https://github.com/ThalesBarretto/libmpu6050/issues>).
 * Start or enter a [discussion](<https://github.com/ThalesBarretto/libmpu6050/discussions>).
 * Send a [pull request](<https://github.com/ThalesBarretto/libmpu6050/pulls>).
+
+## Acknoledgments
+
+Many thanks to
+- [gnif](<https://github.com/gnif>) for the reviews
+- [GeekTeaa](<https://github.com/GeekTeaa>) for the reviews and insights
