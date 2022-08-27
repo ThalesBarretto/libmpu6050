@@ -1063,11 +1063,17 @@ static int mpu_dat_reset(struct mpu_dev *dev)
 		dev->dat->scl[i] = 1; /* scaling factor of 1 */
 		dev->dat->dat[i][0] = 0; /* all data zeroed */
 	}
-
-	/* ensure everything points to null */
-	for(mpu_data_t **ptr = &(dev->AM); ptr <= &(dev->slv4_dat); ptr++) {
-		*ptr = NULL;
-	}
+	/* enforce forbidden access after reset */
+	dev->AM = NULL;
+	dev->GM = NULL;
+	dev->Ax = dev->Ax2 = dev->Axo = dev->Axg = dev->Axm = dev->Axv = dev->Axd = NULL;
+	dev->Ay = dev->Ay2 = dev->Ayo = dev->Ayg = dev->Aym = dev->Ayv = dev->Ayd = NULL;
+	dev->Az = dev->Az2 = dev->Azo = dev->Azg = dev->Azm = dev->Azv = dev->Azd = NULL;
+	dev->Gx = dev->Gx2 = dev->Gxo = dev->Gxg = dev->Gxm = dev->Gxv = dev->Gxd = NULL;
+	dev->Gy = dev->Gy2 = dev->Gyo = dev->Gyg = dev->Gym = dev->Gyv = dev->Gyd = NULL;
+	dev->Gz = dev->Gz2 = dev->Gzo = dev->Gzg = dev->Gzm = dev->Gzv = dev->Gzd = NULL;
+	dev->t = 	  dev->to =  dev->tg =  dev->tm =  dev->tv =  dev->td = NULL;
+	dev->slv0_dat = dev->slv1_dat = dev->slv2_dat = dev->slv3_dat = dev->slv4_dat = NULL;
 
 	return 0;
 }
