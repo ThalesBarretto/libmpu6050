@@ -2,6 +2,12 @@
 
 **What it is**: a library facilitating interaction with the Invensense MPU-6050 device on a Raspberry Pi 3B.
 
+**What it does**: exposes **struct mpu_dev** representing the MPU-6050 deivce and interfaces to handle it.
+
+**Why care?**: correct(regular-interval, simultaneous) sampling from MPU-6050 made simple.
+
+**How to use**: #include in yout C program, see the demo project [mpu6050-demo](<https://github.com/ThalesBarretto/mpu6050>).
+
 ## Requirements
 
 1. Raspberri Pi 3B running the official and up-to-date distro.
