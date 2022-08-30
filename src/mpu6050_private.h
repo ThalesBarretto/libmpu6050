@@ -55,15 +55,18 @@ struct mpu_cal {
 };
 
 /* stores sensor data collection related values */
+#define FIFOMAXWORDS 12 // temp, 3 accels, 3 gyros, 5 slaves[0-4]
 struct mpu_dat {
-	int16_t raw[32];	/* raw sensor data	*/
-	mpu_data_t scl[32];	/* scaling factors	*/
-	mpu_data_t dat[32][2];	/* scaled data		*/
-	mpu_data_t squ[32];	/* squared data		*/
-	mpu_data_t mea[32];	/* data mean		*/
-	mpu_data_t var[32];	/* data variance	*/
-	mpu_data_t AM;		/* accel magnitude	*/
+	int16_t raw[FIFOMAXWORDS];	/* raw sensor data	*/
+	mpu_data_t scl[FIFOMAXWORDS];	/* scaling factors	*/
+	mpu_data_t dat[FIFOMAXWORDS][2];/* scaled data		*/
+	mpu_data_t squ[FIFOMAXWORDS];	/* squared data		*/
+	mpu_data_t mea[FIFOMAXWORDS];	/* data mean		*/
+	mpu_data_t var[FIFOMAXWORDS];	/* data variance	*/
+	mpu_data_t AM;			/* accel magnitude	*/
+	unsigned int fifo_words;
 };
+#undef FIFOMAXWORDS
 
 /* Mirrors configuration register values and their meaning */
 struct mpu_cfg {
