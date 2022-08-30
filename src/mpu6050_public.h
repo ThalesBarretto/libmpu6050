@@ -105,18 +105,6 @@ struct mpu_dev {
 	int	fifomax;	/* fifo buffer capacity in bytes */
 	int	fifocnt;	/* bytes available in fifo */
 	unsigned int gor;	/* gyro output rate (Hz) */
-	double str_xa;		/* self-test response */
-	double str_ya;		/* self-test response */
-	double str_za;		/* self-test response */
-	double str_xg;		/* self-test response */
-	double str_yg;		/* self-test response */
-	double str_zg;		/* self-test response */
-	double ft_xa;		/* factory_trim value */
-	double ft_ya;		/* factory_trim value */
-	double ft_za;		/* factory_trim value */
-	double ft_xg;		/* factory_trim value */
-	double ft_yg;		/* factory_trim value */
-	double ft_zg;		/* factory_trim value */
 	double sr;		/* sampling rate */
 	double st;		/* sampling time */
 	double afr;		/* accelerometer full range in g-force */
