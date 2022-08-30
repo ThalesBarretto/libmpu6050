@@ -128,16 +128,15 @@ struct mpu_dev {
 	double gbdw;		/* gyroscope bandwidth in Hertz (Hz) */
 	double gdly;		/* gyroscope delay in miliseconds (ms) */
 	/* readable data */
-	unsigned long long samples;	/* sample counter			*/
+	unsigned long long samples; /* sample counter			*/
 	mpu_data_t	*AM;
-	mpu_data_t	*GM;
-	mpu_data_t	*Ax, *Ax2, *Axo, *Axg, *Axm, *Axv, *Axd;
-	mpu_data_t	*Ay, *Ay2, *Ayo, *Ayg, *Aym, *Ayv, *Ayd;
-	mpu_data_t	*Az, *Az2, *Azo, *Azg, *Azm, *Azv, *Azd;
-	mpu_data_t	*Gx, *Gx2, *Gxo, *Gxg, *Gxm, *Gxv, *Gxd;
-	mpu_data_t	*Gy, *Gy2, *Gyo, *Gyg, *Gym, *Gyv, *Gyd;
-	mpu_data_t	*Gz, *Gz2, *Gzo, *Gzg, *Gzm, *Gzv, *Gzd;
-	mpu_data_t	*t, 	    *to,  *tg,  *tm,  *tv,  *td;
+	mpu_data_t	*Ax;
+	mpu_data_t	*Ay;
+	mpu_data_t	*Az;
+	mpu_data_t	*Gx;
+	mpu_data_t	*Gy;
+	mpu_data_t	*Gz;
+	mpu_data_t	*t;
 	mpu_data_t	*slv0_dat, *slv1_dat, *slv2_dat, *slv3_dat, *slv4_dat;
 };
 

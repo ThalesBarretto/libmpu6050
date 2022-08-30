@@ -17,7 +17,6 @@
 #include <sys/types.h>		/* for ssize_t */
 #include <sys/ioctl.h>		/* for ioctl() */
 #include <linux/i2c-dev.h>	/* for i2c_smbus_x */
-#include <linux/i2c-dev.h>	/* for i2c_smbus_x */
 #include <i2c/smbus.h> 		/* for i2c_smbus_x */
 #include <linux/i2c.h> 		/* for i2c_smbus_x */
 
@@ -53,7 +52,6 @@ struct mpu_cal {
 	long double yg_bias;	/* found YG value bias */
 	long double zg_bias;	/* found ZG value bias */
 	long double AM_bias;	/* found AM value bias */
-	long double GM_bias;	/* found GM value bias */
 };
 
 /* stores sensor data collection related values */
@@ -65,7 +63,6 @@ struct mpu_dat {
 	mpu_data_t mea[32];	/* data mean		*/
 	mpu_data_t var[32];	/* data variance	*/
 	mpu_data_t AM;		/* accel magnitude	*/
-	mpu_data_t GM;		/* gyro rate magnitude	*/
 };
 
 /* Mirrors configuration register values and their meaning */

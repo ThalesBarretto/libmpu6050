@@ -102,85 +102,38 @@ int mpu_dat_set(struct mpu_dev *dev)
 		dev->dat->scl[count] = 1.0/(double)dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->Ax  = &dev->dat->dat[count][0];
-		dev->Ax2 = &dev->dat->squ[count];
-		dev->Axo = &dev->cal->off[count];
-		dev->Axg = &dev->cal->gai[count];
-		dev->Axd = &dev->cal->dri[count];
-		dev->Axm = &dev->dat->mea[count];
-		dev->Axv = &dev->dat->var[count];
 		count++;
 		dev->dat->scl[count] = 1.0/(double)dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->Ay  = &dev->dat->dat[count][0];
-		dev->Ay2 = &dev->dat->squ[count];
-		dev->Ayo = &dev->cal->off[count];
-		dev->Ayg = &dev->cal->gai[count];
-		dev->Ayd = &dev->cal->dri[count];
-		dev->Aym = &dev->dat->mea[count];
-		dev->Ayv = &dev->dat->var[count];
 		count++;
 		dev->dat->scl[count] = 1.0/(double)dev->albs;
 		dev->dat->dat[count][0] = 0;
 		dev->Az  = &dev->dat->dat[count][0];
-		dev->Az2 = &dev->dat->squ[count];
-		dev->Azo = &dev->cal->off[count];
-		dev->Azg = &dev->cal->gai[count];
-		dev->Azd = &dev->cal->dri[count];
-		dev->Azm = &dev->dat->mea[count];
-		dev->Azv = &dev->dat->var[count];
 	}
 	if (dev->cfg->temp_fifo_en)	{
 		count++;
 		dev->dat->scl[count] = 1/340.0;
 		dev->dat->dat[count][0] = 0;
 		dev->t  = &dev->dat->dat[count][0];
-		dev->to = &dev->cal->off[count];
-		dev->tg = &dev->cal->gai[count];
-		dev->td = &dev->cal->dri[count];
-		dev->tm = &dev->dat->mea[count];
-		dev->tv = &dev->dat->var[count];
 	}
 	if (dev->cfg->xg_fifo_en)	{
 		count++;
-		dev->dat->GM = 0;
-		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
 		dev->dat->dat[count][0] = 0;
 		dev->Gx  = &dev->dat->dat[count][0];
-		dev->Gx2 = &dev->dat->squ[count];
-		dev->Gxo = &dev->cal->off[count];
-		dev->Gxg = &dev->cal->gai[count];
-		dev->Gxd = &dev->cal->dri[count];
-		dev->Gxm = &dev->dat->mea[count];
-		dev->Gxv = &dev->dat->var[count];
 	}
 	if (dev->cfg->yg_fifo_en)	{
 		count++;
-		dev->dat->GM = 0;
-		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
 		dev->dat->dat[count][0] = 0;
 		dev->Gy  = &dev->dat->dat[count][0];
-		dev->Gy2 = &dev->dat->squ[count];
-		dev->Gyo = &dev->cal->off[count];
-		dev->Gyg = &dev->cal->gai[count];
-		dev->Gyd = &dev->cal->dri[count];
-		dev->Gym = &dev->dat->mea[count];
-		dev->Gyv = &dev->dat->var[count];
 	}
 	if (dev->cfg->zg_fifo_en)	{
 		count++;
-		dev->dat->GM = 0;
-		dev->GM  = &dev->dat->GM;
 		dev->dat->scl[count] = 1.0/(double)dev->glbs;
 		dev->dat->dat[count][0] = 0;
 		dev->Gz  = &dev->dat->dat[count][0];
-		dev->Gz2 = &dev->dat->squ[count];
-		dev->Gzo = &dev->cal->off[count];
-		dev->Gzg = &dev->cal->gai[count];
-		dev->Gzd = &dev->cal->dri[count];
-		dev->Gzm = &dev->dat->mea[count];
-		dev->Gzv = &dev->dat->var[count];
 	}
 	/* don't know if the ordering is correct */
 	if (dev->cfg->slv0_fifo_en) {
@@ -241,14 +194,13 @@ int mpu_dat_reset(struct mpu_dev *dev)
 	}
 	/* enforce forbidden access after reset */
 	dev->AM = NULL;
-	dev->GM = NULL;
-	dev->Ax = dev->Ax2 = dev->Axo = dev->Axg = dev->Axm = dev->Axv = dev->Axd = NULL;
-	dev->Ay = dev->Ay2 = dev->Ayo = dev->Ayg = dev->Aym = dev->Ayv = dev->Ayd = NULL;
-	dev->Az = dev->Az2 = dev->Azo = dev->Azg = dev->Azm = dev->Azv = dev->Azd = NULL;
-	dev->Gx = dev->Gx2 = dev->Gxo = dev->Gxg = dev->Gxm = dev->Gxv = dev->Gxd = NULL;
-	dev->Gy = dev->Gy2 = dev->Gyo = dev->Gyg = dev->Gym = dev->Gyv = dev->Gyd = NULL;
-	dev->Gz = dev->Gz2 = dev->Gzo = dev->Gzg = dev->Gzm = dev->Gzv = dev->Gzd = NULL;
-	dev->t = 	  dev->to =  dev->tg =  dev->tm =  dev->tv =  dev->td = NULL;
+	dev->Ax = NULL;
+	dev->Ay = NULL;
+	dev->Az = NULL;
+	dev->Gx = NULL;
+	dev->Gy = NULL;
+	dev->Gz = NULL;
+	dev->t =  NULL;
 	dev->slv0_dat = dev->slv1_dat = dev->slv2_dat = dev->slv3_dat = dev->slv4_dat = NULL;
 
 	return 0;
@@ -387,7 +339,6 @@ int mpu_ctl_calibration_restore(struct mpu_dev *dev, struct mpu_cal *bkp)
 	dev->cal->yg_bias = bkp->yg_bias;
 	dev->cal->zg_bias = bkp->zg_bias;
 	dev->cal->AM_bias = bkp->AM_bias;
-	dev->cal->GM_bias = bkp->GM_bias;
 
 	mpu_ctl_fifo_flush(dev);
 

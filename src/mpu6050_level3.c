@@ -1,6 +1,6 @@
 #include "mpu6050_private.h"
 
-int __attribute__((unused)) mpu_diagnose(struct mpu_dev *dev)
+int mpu_diagnose(struct mpu_dev *dev)
 {
 	if(MPUDEV_IS_NULL(dev)) /* incomplete or uninitialized object */
 		return -1;
@@ -60,13 +60,7 @@ int __attribute__((unused)) mpu_diagnose(struct mpu_dev *dev)
 	printf("dat[7](%p) Gz=%p\n", (void *)dev->dat->dat[7], (void *)dev->Gz);
 	printf("----------------------------------------\n");
 	printf("ADDRESSES:\n");
-	printf("squ[1](%p) Ax=%p\n", (void *)&dev->dat->squ[1], (void *)dev->Ax2);
-	printf("squ[2](%p) Ay=%p\n", (void *)&dev->dat->squ[2], (void *)dev->Ay2);
-	printf("squ[3](%p) Az=%p\n", (void *)&dev->dat->squ[3], (void *)dev->Az2);
 	printf("squ[4](%p) t =%p\n", (void *)&dev->dat->squ[4], (void *)dev->t);
-	printf("squ[5](%p) Gx=%p\n", (void *)&dev->dat->squ[5], (void *)dev->Gx2);
-	printf("squ[6](%p) Gy=%p\n", (void *)&dev->dat->squ[6], (void *)dev->Gy2);
-	printf("squ[7](%p) Gz=%p\n", (void *)&dev->dat->squ[7], (void *)dev->Gz2);
 	printf("----------------------------------------\n");
 	printf("SCALING:\n");
 	printf("scl[1](%lf) %lf\n", dev->dat->scl[1], 1/dev->albs);
@@ -448,7 +442,7 @@ int __attribute__((unused)) mpu_ctl_fifo_reset(struct mpu_dev *dev)
 	return 0;
 }
 
-int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
+int mpu_fifo_read_data(struct mpu_dev *dev, int16_t *data)
 {
 	if (MPUDEV_IS_NULL(dev))
 		return -1;
@@ -460,7 +454,6 @@ int mpu_fifo_data(struct mpu_dev *dev, int16_t *data)
 	if (mpu_read_byte(dev, FIFO_R_W, &buf) < 0)
 		return -1;
 	dh = (uint16_t)(buf & 0x00FF) << 8;
-
 	if (mpu_read_byte(dev, FIFO_R_W, &buf) < 0)
 		return -1;
 	dl = (uint16_t)(buf & 0x00FF);
@@ -492,7 +485,7 @@ int mpu_ctl_fifo_data(struct mpu_dev *dev)
 	}
 
 	for (int i = 1; i < len; i++) {
-		if (mpu_fifo_data(dev, &dev->dat->raw[i]) < 0)
+		if (mpu_fifo_read_data(dev, &dev->dat->raw[i]) < 0)
 			return -1;
 		dev->dat->dat[i][0] = dev->dat->raw[i] * dev->dat->scl[i];
 		dev->dat->dat[i][1] = dev->dat->dat[i][0];
@@ -500,29 +493,24 @@ int mpu_ctl_fifo_data(struct mpu_dev *dev)
 	if (dev->cfg->temp_fifo_en) {
 		*(dev->t) += 36.53;
 	}
+#define square(x) ((x) * (x))
 	if (dev->cfg->accel_fifo_en) {
 		*(dev->Ax) -= (mpu_data_t)dev->cal->xa_bias;
 		*(dev->Ay) -= (mpu_data_t)dev->cal->ya_bias;
 		*(dev->Az) -= (mpu_data_t)dev->cal->za_bias;
-		*(dev->Ax2) = (mpu_data_t)*(dev->Ax) * *(dev->Ax);
-		*(dev->Ay2) = (mpu_data_t)*(dev->Ay) * *(dev->Ay);
-		*(dev->Az2) = (mpu_data_t)*(dev->Az) * *(dev->Az);
-		*(dev->AM) = (mpu_data_t)sqrt(*(dev->Ax2) + *(dev->Ay2) + *(dev->Az2));
+		*(dev->AM) = (mpu_data_t)sqrt(square(*(dev->Ax)) + square(*(dev->Ay)) + square(*(dev->Az)));
 	}
 	if (dev->cfg->xg_fifo_en && dev->cfg->yg_fifo_en && dev->cfg->zg_fifo_en) {
 		*(dev->Gx) -= (mpu_data_t)dev->cal->xg_bias;
 		*(dev->Gy) -= (mpu_data_t)dev->cal->yg_bias;
 		*(dev->Gz) -= (mpu_data_t)dev->cal->zg_bias;
-		*(dev->Gx2) = *(dev->Gx) * *(dev->Gx);
-		*(dev->Gy2) = *(dev->Gy) * *(dev->Gy);
-		*(dev->Gz2) = *(dev->Gz) * *(dev->Gz);
-		*(dev->GM) = (mpu_data_t)sqrt(*(dev->Gx2) + *(dev->Gy2) + *(dev->Gz2));
 	}
+#undef square
 	dev->samples++;
 
 	return 0;
 }
-int __attribute__((unused)) mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
+int mpu_ctl_i2c_mst_reset(struct mpu_dev *dev)
 {
 	if (MPUDEV_IS_NULL(dev))
 		return -1;
@@ -560,7 +548,7 @@ int mpu_ctl_sig_cond_reset(struct mpu_dev *dev)
 	return 0;
 }
 
- inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
+inline void mpu_ctl_fix_axis(struct mpu_dev *dev)
 {
 	if (dev->cfg->accel_fifo_en) {
 		*(dev->Ax) *= -1;

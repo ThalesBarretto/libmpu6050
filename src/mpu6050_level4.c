@@ -315,7 +315,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	long double yg_bias = 0;
 	long double zg_bias = 0;
 	long double AM_bias = 0;
-	long double GM_bias = 0;
 	for (int i = 0; i < dev->cal->samples; i++) {
 		mpu_ctl_fifo_data(dev);
 		xa_bias += *(dev->Ax);
@@ -325,7 +324,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 		yg_bias += *(dev->Gy);
 		zg_bias += *(dev->Gz);
 		AM_bias += *(dev->AM);
-		GM_bias += *(dev->GM);
 	}
 	/* take the average difference */
 	xa_bias /= dev->cal->samples;
@@ -335,7 +333,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	xg_bias /= dev->cal->samples;
 	yg_bias /= dev->cal->samples;
 	zg_bias /= dev->cal->samples;
-	//GM_bias /= dev->cal->samples;
 
 	/* in LSB's, scale things to 1'g acceleration */
 	long double a_factor = (dev->albs *  dev->cal->AM_bias);
@@ -367,7 +364,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	xg_bias = 0;
 	yg_bias = 0;
 	zg_bias = 0;
-	GM_bias = 0;
 	/* store register values */
 	mpu_ctl_fifo_flush(dev);
 	for (int i = 0; i <  dev->cal->samples; i++) {
@@ -379,7 +375,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 		xg_bias += *(dev->Gx);
 		yg_bias += *(dev->Gy);
 		zg_bias += *(dev->Gz);
-		GM_bias += *(dev->GM);
 	}
 	xg_bias /= dev->cal->samples;
 	yg_bias /= dev->cal->samples;
@@ -404,7 +399,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	xg_bias = 0;
 	yg_bias = 0;
 	zg_bias = 0;
-	GM_bias = 0;
 	for (int i = 0; i < dev->cal->samples; i++) {
 		mpu_ctl_fifo_data(dev);
 		xa_bias += *(dev->Ax);
@@ -414,7 +408,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 		xg_bias += *(dev->Gx);
 		yg_bias += *(dev->Gy);
 		zg_bias += *(dev->Gz);
-		GM_bias += *(dev->GM);
 	}
 	/* take the average difference */
 	xa_bias /= dev->cal->samples;
@@ -424,7 +417,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	xg_bias /= dev->cal->samples;
 	yg_bias /= dev->cal->samples;
 	zg_bias /= dev->cal->samples;
-	GM_bias /= dev->cal->samples;
 
 	/* remove gravity */
 	AM_bias -= 1;
@@ -436,7 +428,6 @@ int mpu_ctl_calibrate(struct mpu_dev *dev)
 	dev->cal->yg_bias = yg_bias;
 	dev->cal->zg_bias = zg_bias;
 	dev->cal->AM_bias = AM_bias;
-	dev->cal->GM_bias = GM_bias;
 
 	/* restore old config */
 	memcpy((void *)dev->cfg, (void *)cfg_old, sizeof(struct mpu_cfg));
