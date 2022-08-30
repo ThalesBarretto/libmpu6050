@@ -3,7 +3,7 @@ CPPFLAGS=
 CFLAGS	=-DNDEBUG -O2 -march=native -mtune=native -fPIC -Wall -Wextra -Wpedantic
 DBGFLAGS=-DMPU6050_DEBUG
 LIBS	=-lm -li2c
-MODULE	=mpu6050
+MODULE	=libmpu6050
 MODV	=0
 APIV	=0
 
@@ -14,8 +14,8 @@ OBJ	=$(BLD)/obj
 TST	=$(BLD)/tst
 
 # Headers and sources
-HDRS	=$(wildcard $(SRC)/$(MODULE)*.h)
-SRCS	=$(wildcard $(SRC)/$(MODULE)*.c)
+HDRS	=$(wildcard $(SRC)/*.h)
+SRCS	=$(wildcard $(SRC)/*.c)
 OBJS	=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 # Tests sources, object and binary files
@@ -29,6 +29,7 @@ prefix=/usr
 INCDIR=$(prefix)/include
 BINDIR=$(prefix)/bin
 LIBDIR=$(prefix)/lib
+PUBHDR=$(wildcard $(SRC)/*_public.h)
 
 $(TST):
 	mkdir -p $@
@@ -59,13 +60,13 @@ manpages_clean:
 	-cd man && make clean && cd ..
 
 partial: $(OBJS)
-	ld -r $^ -o $(BLD)/lib$(MODULE).o
+	ld -r $^ -o $(BLD)/$(MODULE).o
 
 static: $(OBJS)
-	ar rcs $(BLD)/lib$(MODULE).a $^
+	ar rcs $(BLD)/$(MODULE).a $^
 
 shared: $(OBJS)
-	$(CC) $(CFLAGS) --shared $^ -o $(BLD)/lib$(MODULE).so $(LIBS)
+	$(CC) $(CFLAGS) --shared $^ -o $(BLD)/$(MODULE).so $(LIBS)
 
 test: $(TSTB)
 	$<
@@ -78,22 +79,22 @@ clean: manpages_clean
 	rm -rf $(BLD) $(BLD)
 
 install: manpages_install
-	sudo $(INSTALL) -d --owner=root --group=root $(INSTDIR)/lib$(MODULE)
-	sudo cp -r $(wildcard $(BLD)/*) $(INSTDIR)/lib$(MODULE)
-	sudo $(INSTALL) -D --owner=root --group=root $(BLD)/lib$(MODULE).so $(LIBDIR)/lib$(MODULE).so.$(APIV).$(MODV)
-	sudo ln -sf $(LIBDIR)/lib$(MODULE).so.$(APIV).$(MODV) $(LIBDIR)/lib$(MODULE).so.$(APIV)
-	sudo ln -sf $(LIBDIR)/lib$(MODULE).so.$(APIV) $(LIBDIR)/lib$(MODULE).so
-	sudo mkdir -p $(INSTDIR)/lib$(MODULE)/include
-	sudo cp -r $(HDRS) $(INSTDIR)/lib$(MODULE)/include
-	sudo mkdir -p $(INCDIR)/lib$(MODULE)
-	sudo cp -r $(HDRS) $(INCDIR)/lib$(MODULE)
+	sudo $(INSTALL) -d --owner=root --group=root $(INSTDIR)/$(MODULE)
+	sudo cp -r $(wildcard $(BLD)/*) $(INSTDIR)/$(MODULE)
+	sudo $(INSTALL) -D --owner=root --group=root $(BLD)/$(MODULE).so $(LIBDIR)/$(MODULE).so.$(APIV).$(MODV)
+	sudo ln -sf $(LIBDIR)/$(MODULE).so.$(APIV).$(MODV) $(LIBDIR)/$(MODULE).so.$(APIV)
+	sudo ln -sf $(LIBDIR)/$(MODULE).so.$(APIV) $(LIBDIR)/$(MODULE).so
+	sudo mkdir -p $(INSTDIR)/$(MODULE)/include
+	sudo cp -r $(PUBHDR) $(INSTDIR)/$(MODULE)/include
+	sudo mkdir -p $(INCDIR)/$(MODULE)
+	sudo $(INSTALL) -D --owner=root --group=root --mode=0644 $(PUBHDR) $(INCDIR)/$(MODULE)/$(MODULE).h
 
 uninstall: manpages_uninstall
-	sudo rm -rf $(INSTDIR)/lib$(MODULE)
-	sudo rm $(LIBDIR)/lib$(MODULE).so.$(APIV).$(MODV)
-	sudo rm $(LIBDIR)/lib$(MODULE).so.$(APIV)
-	sudo rm $(LIBDIR)/lib$(MODULE).so
-	sudo rm -rf $(INCDIR)/lib$(MODULE)
+	sudo rm -rf $(INSTDIR)/$(MODULE)
+	sudo rm $(LIBDIR)/$(MODULE).so.$(APIV).$(MODV)
+	sudo rm $(LIBDIR)/$(MODULE).so.$(APIV)
+	sudo rm $(LIBDIR)/$(MODULE).so
+	sudo rm -rf $(INCDIR)/$(MODULE)
 
 remove: uninstall
 
