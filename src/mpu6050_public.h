@@ -72,21 +72,18 @@ struct mpu_dev;
 #define MPU6050_CFGFILE "mpu6050_cfg.bin"
 #endif
 
-int mpu_init(	const char * const path,
-		struct mpu_dev **mpudev,
-		const int mode);
-
+int mpu_init(const char * const path, struct mpu_dev **mpudev, const int mode);
 int mpu_destroy		(struct mpu_dev *dev);
 int mpu_get_data	(struct mpu_dev *dev);
 int mpu_ctl_calibrate	(struct mpu_dev *dev);
 int mpu_ctl_reset	(struct mpu_dev *dev);
-int mpu_ctl_dump	(struct mpu_dev *dev, char *filename);
-int mpu_ctl_selftest	(struct mpu_dev *dev, char *filename);
-int mpu_ctl_samplerate	(struct mpu_dev *dev, unsigned int hertz);
 int mpu_ctl_dlpf	(struct mpu_dev *dev, unsigned int dlpf);
+int mpu_ctl_samplerate	(struct mpu_dev *dev, unsigned int hertz);
 int mpu_ctl_accel_range	(struct mpu_dev *dev, unsigned int range);
 int mpu_ctl_gyro_range	(struct mpu_dev *dev, unsigned int range);
-int mpu_ctl_clocksource	(struct mpu_dev *dev, mpu_reg_t clksel);
+int mpu_ctl_clocksource	(struct mpu_dev *dev, unsigned int clksel);
+int mpu_ctl_selftest	(struct mpu_dev *dev, char *filename);
+int mpu_ctl_dump	(struct mpu_dev *dev, char *filename);
 
 struct mpu_dev {
 	/* basic interface setting */
