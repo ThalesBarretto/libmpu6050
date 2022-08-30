@@ -59,7 +59,7 @@ manpages_clean:
 	-cd man && make clean && cd ..
 
 partial: $(OBJS)
-	ld -r $^ -o $(BLD)/$(MODULE).o
+	ld -r $^ -o $(BLD)/lib$(MODULE).o
 
 static: $(OBJS)
 	ar rcs $(BLD)/lib$(MODULE).a $^
