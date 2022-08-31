@@ -3,7 +3,7 @@ PROGV	=1
 
 INSTALL	=install
 PANDOC	=pandoc
-CMPRPRG	=gzip
+CMPRPRG	=gzip --force
 CMPREXT	=gz
 MANDIR	=/usr/share/man
 MANPAGE	=1
