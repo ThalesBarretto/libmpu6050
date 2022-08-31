@@ -1,6 +1,6 @@
 CC	=gcc
 CPPFLAGS=
-CFLAGS	=-DNDEBUG -O2 -march=native -mtune=native -fPIC -Wall -Wextra -Wpedantic
+CFLAGS	=-g -O2 -fPIC -Wall -Wextra -Wpedantic
 DBGFLAGS=-DMPU6050_DEBUG
 LIBS	=-lm -li2c
 MODULE	=libmpu6050
