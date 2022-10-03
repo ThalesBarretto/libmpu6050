@@ -4,6 +4,7 @@ PROGV	=1
 INSTALL	=install
 PANDOC	=pandoc
 CMPRPRG	=gzip
+CMPROPT	=--force
 CMPREXT	=gz
 MANDIR	=/usr/share/man
 MANPAGE	=1
@@ -13,7 +14,7 @@ MANCMPR	=$(MANFILE).$(CMPREXT)
 
 man:	$(PROGB).md
 	-$(PANDOC) --standalone --to man $(PROGB).md -o $(MANFILE)
-	-$(CMPRPRG) $(MANFILE)
+	-$(CMPRPRG) $(CMPROPT) $(MANFILE)
 
 install:
 	-sudo $(INSTALL) -D --mode 0644 $(MANCMPR) $(MANDEST)
